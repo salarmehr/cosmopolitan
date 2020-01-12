@@ -6,9 +6,8 @@
 declare(strict_types=1);
 
 namespace Salarmehr;
-require '../vendor/autoload.php';
 
-class Intl
+class Cosmopolitan
 {
     public $locale = null;
     private $timezone;

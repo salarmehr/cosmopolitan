@@ -4,7 +4,7 @@ namespace Salarmehr;
 
 use PHPUnit\Framework\TestCase;
 
-class IntlTest extends TestCase
+class CosmopolitanTest extends TestCase
 {
     public function test__construct()
     {
@@ -25,7 +25,7 @@ class IntlTest extends TestCase
      */
     public function testLanguage($local, $language, $name)
     {
-        $intl = new Intl($local);
+        $intl = new Cosmopolitan($local);
         $this->assertEquals($intl->language($language), $name);
     }
 
@@ -51,7 +51,7 @@ class IntlTest extends TestCase
      */
     public function testQute($local, $text, $quote)
     {
-        $intl = new Intl($local);
+        $intl = new Cosmopolitan($local);
         $this->assertEquals($intl->quote($text), $quote);
     }
 
@@ -84,7 +84,7 @@ class IntlTest extends TestCase
      */
     public function testMessage($local, $text, $arguments, $message)
     {
-        $intl = new Intl($local);
+        $intl = new Cosmopolitan($local);
         $this->assertEquals($intl->message($text, $arguments), $message);
     }
 
@@ -112,7 +112,7 @@ class IntlTest extends TestCase
      */
     public function testCountry($local, $country, $name)
     {
-        $intl = new Intl($local);
+        $intl = new Cosmopolitan($local);
         $this->assertEquals($intl->country($country), $name);
     }
 

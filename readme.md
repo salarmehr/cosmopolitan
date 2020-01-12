@@ -1,11 +1,14 @@
-Super Locale 
-===
-Super Locale is a super efficient way to localise your application. Just set the locale of the current user. 
+Cosmopolitan 
+============
+Cosmopolitan is the ultimate tool to localise your application. Just set the locale (language-country) and timezone, and your
+application is localised for your audience.
 
+- Cosmopolitan is based on intl PHP extension and super-efficient
+- Internationalisation for all countries, languages, scripts, calendars, and timezones
 
 Features
 ---------
-Super Locale can be used to format these categories of data for all countries, all languages and all time-zones
+Supports localisation of
 
 - Currency
 - Time (from milliseconds to era)
@@ -14,7 +17,7 @@ Super Locale can be used to format these categories of data for all countries, a
 - Ordinal Numbers
 - Quoting text
 - Translating the name of languages and countries
-- Spelling out number 
+- Spelling out of numbers
 - Duration
 - ...
 
@@ -60,9 +63,9 @@ Sonntag, 12. Januar 2020
 19:26
 „Reza!“
 123.400,567
-14 %
+14 %
 zehn Milliarden eins
-12,30 AU$
+12,30 AU$
 599
 
 Localising some values for: 中文 (ZH)
