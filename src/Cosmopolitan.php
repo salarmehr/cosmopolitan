@@ -88,17 +88,17 @@ class Cosmopolitan
         return $formatter->format($value);
     }
 
-    public function number(float $number)
+    public function number(float $number): string
     {
         return (new \NumberFormatter($this->locale, \NumberFormatter::DEFAULT_STYLE))->format($number);
     }
 
-    public function ordinal(int $number)
+    public function ordinal(int $number): string
     {
         return (new \NumberFormatter($this->locale, \NumberFormatter::ORDINAL))->format($number);
     }
 
-    public function spellout(float $number)
+    public function spellout(float $number): string
     {
         return (new \NumberFormatter($this->locale, \NumberFormatter::SPELLOUT))->format($number);
     }
