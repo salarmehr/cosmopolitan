@@ -39,6 +39,68 @@ foreach (['en_AU', 'de', 'zh', 'en_UK', 'fa_IR'] as $locale) {
     echo $intl->duration(599) . PHP_EOL . PHP_EOL;
 }
 ~~~~~~
+will output:
+~~~~
+Localising some values for: English (Australia)
+12/1/20, 7:26:36 pm
+2nd
+Sunday, 12 January 2020
+7:26 pm
+“Reza!”
+123,400.567
+14%
+ten billion one
+$12.30
+9:59
+
+Localising some values for: Deutsch (Deutschland)
+12.01.20, 19:26:36
+2.
+Sonntag, 12. Januar 2020
+19:26
+„Reza!“
+123.400,567
+14 %
+zehn Milliarden eins
+12,30 AU$
+599
+
+Localising some values for: 中文 (ZH)
+2020/1/12 下午7:26:36
+第2
+2020年1月12日星期日
+下午7:26
+“Reza!”
+123,400.567
+14%
+一百亿〇一
+AU$12.30
+599
+
+Localising some values for: English (United Kingdom)
+1/12/20, 7:26:36 PM
+2nd
+Sunday, January 12, 2020
+7:26 PM
+“Reza!”
+123,400.567
+14%
+ten billion one
+A$12.30
+9:59
+
+Localising some values for: فارسی (ایران)
+۱۳۹۸/۱۰/۲۲،‏ ۱۹:۲۶:۳۶
+۲.
+۱۳۹۸ دی ۲۲, یکشنبه
+۱۹:۲۶
+«Reza!»
+۱۲۳٬۴۰۰٫۵۶۷
+۱۴٪
+ده میلیارد و یک
+‎A$۱۲٫۳۰
+۵۹۹
+~~~~
 
 Installation
 ============
