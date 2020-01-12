@@ -6,13 +6,12 @@
 declare(strict_types=1);
 
 namespace Salarmehr;
-require '../vendor/autoload.php';
 
-class Intl
+class Cosmopolitan
 {
-    public $locale = null;
+    public $locale;
     private $timezone;
-    private $calendar = \IntlDateFormatter::TRADITIONAL; // official local calendar or force Gregorian
+    private $useLocaleCalender;
 
     const NONE = \IntlDateFormatter::NONE;
     const SHORT = \IntlDateFormatter::SHORT;
@@ -20,9 +19,13 @@ class Intl
     const LONG = \IntlDateFormatter::LONG;
     const FULL = \IntlDateFormatter::FULL;
 
-    public function __construct(string $locale = null, $timezone = null, $calendar = 0)
+    public function __construct(string $locale = null, string $timezone = null, bool $userLocalCalender = true)
     {
         $this->locale = $locale ?: \Locale::getDefault();
+        $this->timezone = $timezone;
+
+        // use the local calendar system in the countries which use non-gregorian calendar.
+        $this->useLocaleCalender = $userLocalCalender;
     }
 
     /**
@@ -87,7 +90,7 @@ class Intl
 
     public function number(float $number)
     {
-        return (new \NumberFormatter($this->locale, \NumberFormatter::DEFAULT_STYLE ))->format($number);
+        return (new \NumberFormatter($this->locale, \NumberFormatter::DEFAULT_STYLE))->format($number);
     }
 
     public function ordinal(int $number)
@@ -121,13 +124,14 @@ class Intl
      */
     public function customTime($value, string $format): string
     {
-        $formatter = new \IntlDateFormatter($this->locale, null, null, $this->timezone, $this->calendar, $format);
+        $formatter = new \IntlDateFormatter($this->locale, null, null, $this->timezone, $this->calendarType, $format);
         return $formatter->format($value);
     }
 
     public function datetime($value, int $datetype = self::SHORT, int $timetype = self::MEDIUM): string
     {
-        $formatter = new \IntlDateFormatter($this->locale, $datetype, $timetype, $this->timezone, $this->calendar);
+        $calendarType = $this->useLocaleCalender ? \IntlDateFormatter::TRADITIONAL : \IntlDateFormatter::GREGORIAN;
+        $formatter = new \IntlDateFormatter($this->locale, $datetype, $timetype, $this->timezone, $calendarType);
         return $formatter->format($value);
     }
 

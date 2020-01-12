@@ -1,11 +1,14 @@
-Super Locale 
-===
-Super Locale is a super efficient way to localise your application. Just set the locale of the current user. 
+Cosmopolitan 
+============
+Cosmopolitan is the ultimate tool to localise your application. Just set the locale (language-country) and timezone, and your
+application is localised for your audience.
 
+- Cosmopolitan is based on intl PHP extension and super-efficient
+- Internationalisation for all countries, languages, scripts, calendars, and timezones
 
 Features
 ---------
-Super Locale can be used to format these categories of data for all countries, all languages and all time-zones
+Supports localisation of
 
 - Currency
 - Time (from milliseconds to era)
@@ -14,23 +17,23 @@ Super Locale can be used to format these categories of data for all countries, a
 - Ordinal Numbers
 - Quoting text
 - Translating the name of languages and countries
-- Spelling out number 
+- Spelling out of numbers
 - Duration
 - ...
 
 Examples
 --------
 ~~~~~php
-foreach (['en_AU', 'de', 'zh', 'en_UK', 'fa_IR'] as $locale) {
+foreach (['en_AU', 'de_DE', 'zh_CH', 'en_UK', 'fa_IR'] as $locale) {
 
-    $intl = new \Salarmehr\Intl($locale, 'Australia/Sydney');
+    $intl = new \Salarmehr\Cosmopolitan($locale, 'Australia/Sydney'); // all 
     // or suing the helper $intl= intl($locale);
 
     echo "Localising some values for: " . $intl->language($locale) . " (" . $intl->country($locale) . ")" . PHP_EOL;
     echo $intl->datetime(time()) . PHP_EOL;
     echo $intl->ordinal(2) . PHP_EOL;
-    echo $intl->date(time(), Intl::FULL) . PHP_EOL;
-    echo $intl->time(time(), Intl::SHORT) . PHP_EOL;
+    echo $intl->date(time(), Cosmopolitan::FULL) . PHP_EOL;
+    echo $intl->time(time(), Cosmopolitan::SHORT) . PHP_EOL;
     echo $intl->quote("Reza!") . PHP_EOL;
     echo $intl->number(123400.567) . PHP_EOL;
     echo $intl->percentage(.14) . PHP_EOL;
@@ -60,9 +63,9 @@ Sonntag, 12. Januar 2020
 19:26
 „Reza!“
 123.400,567
-14 %
+14 %
 zehn Milliarden eins
-12,30 AU$
+12,30 AU$
 599
 
 Localising some values for: 中文 (ZH)
