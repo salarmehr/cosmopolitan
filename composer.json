@@ -1,0 +1,27 @@
+{
+  "name": "salarmehr/locale",
+  "description": "Super efficient application localisation",
+  "type": "Utility",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Reza Salarmehr",
+      "email": "salarmehr@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.2.0",
+    "ext-intl": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Salarmehr\\": "src/"
+    },
+    "files": [
+      "src/helper.php"
+    ]
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^8.5"
+  }
+}

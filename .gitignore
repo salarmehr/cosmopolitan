@@ -1,0 +1,10 @@
+/vendor/
+/lab/
+composer.lock
+.idea
+
+**/temp/
+**/temp.*
+**/*.temp.*
+
+.phpunit.result.cache
