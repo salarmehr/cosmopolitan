@@ -27,7 +27,7 @@ Examples
 foreach (['en_AU', 'de_DE', 'zh_CH', 'en_UK', 'fa_IR'] as $locale) {
 
     $intl = new \Salarmehr\Cosmopolitan($locale, 'Australia/Sydney'); // all 
-    // or suing the helper $intl= intl($locale);
+    // or using the helper $intl= intl($locale);
 
     echo "Localising some values for: " . $intl->language($locale) . " (" . $intl->country($locale) . ")" . PHP_EOL;
     echo $intl->datetime(time()) . PHP_EOL;
