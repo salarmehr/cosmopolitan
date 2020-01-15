@@ -21,6 +21,13 @@ Supports localisation of
 - Duration
 - ...
 
+Installation
+============
+Make sure the `php-intl` extension is installed and enabled by checking both `phpinfo()` page and  `php -m` command and run
+~~~    
+composer require salarmehr/cosmopolitan
+~~~ 
+
 Examples
 --------
 ~~~~~php
@@ -105,12 +112,6 @@ Localising some values for: فارسی (ایران)
 ۵۹۹
 ~~~~
 
-Installation
-============
-Make sure the `php-intl` extension is installed and enabled in phpinfo() page in `phpinfo()` page and not just `php -m` command and run
-~~~    
-composer require salarmehr/locale
-~~~ 
 Licence
 =======
 MIT
