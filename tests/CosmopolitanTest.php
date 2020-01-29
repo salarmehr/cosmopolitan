@@ -1,6 +1,6 @@
 <?php
 
-namespace Salarmehr;
+namespace Salarmehr\Cosmopolitan;
 
 use PHPUnit\Framework\TestCase;
 
@@ -25,7 +25,7 @@ class CosmopolitanTest extends TestCase
      */
     public function testLanguage($local, $language, $name)
     {
-        $intl = new Cosmopolitan($local);
+        $intl = new Intl($local);
         $this->assertEquals($intl->language($language), $name);
     }
 
@@ -51,7 +51,7 @@ class CosmopolitanTest extends TestCase
      */
     public function testQute($local, $text, $quote)
     {
-        $intl = new Cosmopolitan($local);
+        $intl = new Intl($local);
         $this->assertEquals($intl->quote($text), $quote);
     }
 
@@ -84,7 +84,7 @@ class CosmopolitanTest extends TestCase
      */
     public function testMessage($local, $text, $arguments, $message)
     {
-        $intl = new Cosmopolitan($local);
+        $intl = new Intl($local);
         $this->assertEquals($intl->message($text, $arguments), $message);
     }
 
@@ -112,7 +112,7 @@ class CosmopolitanTest extends TestCase
      */
     public function testCountry($local, $country, $name)
     {
-        $intl = new Cosmopolitan($local);
+        $intl = new Intl($local);
         $this->assertEquals($intl->country($country), $name);
     }
 

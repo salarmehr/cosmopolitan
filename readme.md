@@ -120,3 +120,9 @@ Localising some values for: فارسی (ایران)
 Licence
 =======
 MIT
+
+Links
+=====
+- [Locale Explorer](http://demo.icu-project.org/icu-bin/locexp)
+- [ICU Data](https://github.com/unicode-org/icu/tree/release-65-1/icu4c/source/data)
+- [ICU data tables by Alexander Makarov](https://intl.rmcreative.ru/)

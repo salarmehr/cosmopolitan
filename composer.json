@@ -15,7 +15,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Salarmehr\\": "src/"
+      "Salarmehr\\Cosmopolitan\\": "src/"
     },
     "files": [
       "src/helper.php"
