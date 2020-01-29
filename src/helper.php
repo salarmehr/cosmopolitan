@@ -4,8 +4,8 @@
  */
 
 if (!function_exists('intl')) {
-    function intl($locale)
+    function intl(string $locale = null, string $timezone = null, array $options = []): \Salarmehr\Cosmopolitan\Intl
     {
-        return new \Salarmehr\Cosmopolitan($locale);
+        return new \Salarmehr\Cosmopolitan\Intl($locale, $timezone, $options);
     }
 }

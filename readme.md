@@ -1,18 +1,20 @@
 Cosmopolitan 
 ============
-Cosmopolitan is the ultimate tool to localise your application. Just set the locale (language-country) and timezone, and your
-application is localised for your audience.
+Cosmopolitan is the ultimate tool to localise your PHP application.
+Just set the locale (language-country) and timezone, and your
+application would be localised for your audience.
 
 - Cosmopolitan is based on intl PHP extension and super-efficient
 - Internationalisation for all countries, languages, scripts, calendars, and timezones
 
 Features
 ---------
-Supports localisation of
+Cosmopolitan supports localisation of
 
-- Currency
+- Currency name and Symbol
+- Monetary ary values
 - Time (from milliseconds to era)
-- Number
+- Numbers
 - Percentage
 - Ordinal Numbers
 - Quoting text
@@ -28,95 +30,117 @@ Make sure the `php-intl` extension is installed and enabled by checking both `ph
 composer require salarmehr/cosmopolitan
 ~~~ 
 
-Examples
+Example
 --------
+The following example demonstrates a subset of available functions.
+Please check the  `\src\Intl.php` to find out all available features.
 ~~~~~php
-<?php  // example.php
+<?php
+// example.php
+require_once 'vendor/autoload.php';
 
-require_once 'path/to/composer/autoload.php';
+use Salarmehr\Cosmopolitan\Intl;
 
-foreach (['en_AU', 'en_UK', 'de_DE', 'zh_CH', 'fa_IR'] as $locale) {
+$localAndTimezone = ['en_AU' => 'AUD', 'en_UK' => 'GBP', 'de_DE' => 'EUR', 'zh_CH' => 'CNY', 'fa_IR' => 'IRR'];
+$time = time();
 
-    $intl = new \Salarmehr\Cosmopolitan($locale, 'Australia/Sydney');
-    // or using the helper $intl=intl($locale);
+foreach ($localAndTimezone as $locale => $currency) {
+
+    $intl = new Intl($locale, 'Australia/Sydney');
+    // or use the helper $intl=intl($locale);
 
     echo "Localising some values for: " . $intl->language($locale) . " (" . $intl->country($locale) . ")" . "\n";
-    echo $intl->datetime(time()) . "\n";
     echo $intl->ordinal(2) . "\n";
-    echo $intl->date(time(), Cosmopolitan::FULL) . "\n";
-    echo $intl->time(time(), Cosmopolitan::SHORT) . "\n";
-    echo $intl->quote("Reza!") . "\n";
+    echo $intl->quote("Quoted text!") . "\n";
     echo $intl->number(123400.567) . "\n";
     echo $intl->percentage(.14) . "\n";
     echo $intl->spellout(10000000001) . "\n";
-    echo $intl->currency(12.3, 'AUD') . "\n";
-    echo $intl->duration(599) . "\n\n";
+    echo $intl->money(12.3, $currency) . "\n";
+    echo $intl->currency($currency) . "\n";
+    echo $intl->duration(599) . "\n";
+
+    // you can send 'short','medium','long' or 'full
+    // as an argument to set the type of time or date.
+    echo $intl->moment($time) . "\n"; // data and time
+    echo $intl->time($time, 'full') . "\n";
+    echo $intl->date($time, 'full') . "\n";
+    echo PHP_EOL;
 }
 ~~~~~~
 will output:
 ~~~~
 Localising some values for: English (Australia)
-15/1/20, 8:11:49 pm
 2nd
-Wednesday, 15 January 2020
-8:11 pm
-“Reza!”
+“Quoted text!”
 123,400.567
 14%
 ten billion one
 $12.30
+Australian Dollar
 9:59
+23/2/20, 2:23 pm
+2:23:50 pm Australian Eastern Daylight Time
+Sunday, 23 February 2020
 
 Localising some values for: English (United Kingdom)
-1/15/20, 8:11:49 PM
 2nd
-Wednesday, January 15, 2020
-8:11 PM
-“Reza!”
+“Quoted text!”
 123,400.567
 14%
 ten billion one
-A$12.30
+£12.30
+British Pound
 9:59
+2/23/20, 2:23 PM
+2:23:50 PM Australian Eastern Daylight Time
+Sunday, February 23, 2020
 
 Localising some values for: Deutsch (Deutschland)
-15.01.20, 20:11:49
 2.
-Mittwoch, 15. Januar 2020
-20:11
-„Reza!“
+„Quoted text!“
 123.400,567
 14 %
 zehn Milliarden eins
-12,30 AU$
+12,30 €
+Euro
 599
+23.02.20, 14:23
+14:23:50 Ostaustralische Sommerzeit
+Sonntag, 23. Februar 2020
 
 Localising some values for: 中文 (瑞士)
-2020/1/15 下午8:11:49
 第2
-2020年1月15日星期三
-下午8:11
-“Reza!”
+“Quoted text!”
 123,400.567
 14%
 一百亿〇一
-AU$12.30
+￥12.30
+人民币
 599
+2020/2/23 下午2:23
+澳大利亚东部夏令时间 下午2:23:50
+2020年2月23日星期日
 
 Localising some values for: فارسی (ایران)
-۱۳۹۸/۱۰/۲۵،‏ ۲۰:۱۱:۴۹
 ۲.
-۱۳۹۸ دی ۲۵, چهارشنبه
-۲۰:۱۱
-«Reza!»
+«Quoted text!»
 ۱۲۳٬۴۰۰٫۵۶۷
 ۱۴٪
 ده میلیارد و یک
-‎A$۱۲٫۳۰
+‎ریال ۱۲
+ریال ایران
 ۵۹۹
-
+۱۳۹۸/۱۲/۴،‏ ۱۴:۲۳
+۱۴:۲۳:۵۰ (وقت تابستانی شرق استرالیا)
+۱۳۹۸ اسفند ۴, یکشنبه
 ~~~~
 
 Licence
 =======
 MIT
+
+Links
+=====
+- [Locale Explorer](http://demo.icu-project.org/icu-bin/locexp)
+- [ICU Data](https://github.com/unicode-org/icu/tree/release-65-1/icu4c/source/data)
+- [ICU data tables by Alexander Makarov](https://intl.rmcreative.ru/)

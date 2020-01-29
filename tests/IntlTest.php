@@ -1,15 +1,11 @@
 <?php
 
-namespace Salarmehr;
+namespace Salarmehr\Cosmopolitan;
 
 use PHPUnit\Framework\TestCase;
 
-class CosmopolitanTest extends TestCase
+class IntlTest extends TestCase
 {
-    public function test__construct()
-    {
-    }
-
     public function languageProvider()
     {
         return [
@@ -25,13 +21,14 @@ class CosmopolitanTest extends TestCase
      */
     public function testLanguage($local, $language, $name)
     {
-        $intl = new Cosmopolitan($local);
+        $intl = new Intl($local);
         $this->assertEquals($intl->language($language), $name);
     }
 
     public function testPercentage()
     {
-
+        $actual = Intl::create('en_AU')->percentage(.2);
+        $this->assertEquals('20%', $actual);
     }
 
     public function quoteProvider()
@@ -49,15 +46,16 @@ class CosmopolitanTest extends TestCase
     /**
      * @dataProvider quoteProvider
      */
-    public function testQute($local, $text, $quote)
+    public function testQuote($local, $text, $quote)
     {
-        $intl = new Cosmopolitan($local);
+        $intl = new Intl($local);
         $this->assertEquals($intl->quote($text), $quote);
     }
 
-    public function testBundle()
+    public function testGet()
     {
-
+        $actual = Intl::create('en_AU')->get(Bundle::LOCALE, 'listPattern')->get('standard')->get('end');
+        $this->assertEquals('{0} and {1}', $actual);
     }
 
     public function messageProvider()
@@ -84,18 +82,35 @@ class CosmopolitanTest extends TestCase
      */
     public function testMessage($local, $text, $arguments, $message)
     {
-        $intl = new Cosmopolitan($local);
+        $intl = new Intl($local);
         $this->assertEquals($intl->message($text, $arguments), $message);
     }
 
     public function testCurrency()
     {
+        $actual = Intl::create('en_AU')->currency('aud');
+        $this->assertEquals('Australian Dollar', $actual);
 
+        $actual = Intl::create('en_AU')->currency('aud', true);
+        $this->assertEquals('$', $actual);
+
+        $this->expectException(Exception::class);
+        Intl::create('en_AU')->currency('foo', false, true);
+    }
+
+    public function testMoney()
+    {
+        $actual = Intl::create('en_AU')->money(12.3, 'aud');
+        $this->assertEquals('$12.30', $actual);
+
+        $actual = Intl::create('en_US')->money(12.3, 'aud');
+        $this->assertEquals('A$12.30', $actual);
     }
 
     public function testOrdinal()
     {
-
+        $actual = Intl::create('en_AU')->ordinal(1);
+        $this->assertEquals('1st', $actual);
     }
 
     public function countryProvider()
@@ -112,11 +127,16 @@ class CosmopolitanTest extends TestCase
      */
     public function testCountry($local, $country, $name)
     {
-        $intl = new Cosmopolitan($local);
+        $intl = new Intl($local);
         $this->assertEquals($intl->country($country), $name);
     }
 
     public function testDuration()
     {
+        $actual = Intl::create('en_US')->duration(1222060);
+        $this->assertEquals('339:27:40', $actual);
+
+        $actual = Intl::create('en_US')->duration(1222060, true);
+        $this->assertEquals('339 hours, 27 minutes, 40 seconds', $actual);
     }
 }
