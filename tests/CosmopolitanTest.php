@@ -13,8 +13,8 @@ class CosmopolitanTest extends TestCase
     public function languageProvider()
     {
         return [
-            ['en', 'en', 'English'],
-            ['en', 'en_AU', 'English'],
+            ['en_US', 'en', 'English'],
+            ['en_AU', 'en', 'English'],
             ['fa', 'en', 'انگلیسی'],
             ['fa', 'fa', 'فارسی'],
         ];
@@ -102,7 +102,6 @@ class CosmopolitanTest extends TestCase
     {
         return [
             ['en', 'AU', 'Australia'],
-            ['en', 'en_AU', 'Australia'],
             ['fa', 'AU', 'استرالیا'],
         ];
     }

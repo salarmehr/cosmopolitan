@@ -5,8 +5,6 @@
 declare(strict_types=1);
 
 namespace Salarmehr\Cosmopolitan;
-require_once "Exception.php";
-require_once "Bundle.php";
 
 class Intl
 {
@@ -20,20 +18,30 @@ class Intl
     public $locale;
     public $defaults = [
         'useLocalCalender' => true,
-        'bundleName'       => null,
-        'fallback'         => true,
+        'bundleName' => null,
+        'fallback' => true,
     ];
     private $timezone;
     private $useLocalCalender;
 
-    public function __construct(string $locale = null, string $timezone = null, array $options = [])
-    {
+    public function __construct(string $locale = null, string $timezone = null, array $options = []) {
         $options = $options + $this->defaults;
         $this->locale = $locale ?: \Locale::getDefault();
         $this->timezone = $timezone;
 
         $this->useLocalCalender = $options['useLocalCalender'];
-        $this->bundle = \ResourceBundle::create($this->locale, $options['bundleName'], $options['fallback']);
+    }
+
+    public function get(\ResourceBundle $bundle, string $key) {
+        $output = $bundle->get($key);
+        if ($output == null && intl_is_failure($bundle->getErrorCode())) {
+            throw new Exception($bundle->getErrorMessage());
+        }
+        return $output;
+    }
+
+    private function getBundle(string $bundle): \ResourceBundle {
+        return \ResourceBundle::create($this->locale, $bundle);
     }
 
     #region key/value functions
@@ -43,16 +51,9 @@ class Intl
      * @return string
      * @throws Exception
      */
-    public function currency(string $currency, bool $symbole = false): string
-    {
+    public function currency(string $currency, bool $symbole = false): string {
         $bundle = \ResourceBundle::create($this->locale, 'ICUDATA-curr');
         return $this->get($bundle, 'Currencies')[$currency][$symbole ? 0 : 1];
-    }
-
-    public function get($bundle, string $key): \ResourceBundle
-    {
-        $bundle = new \Salarmehr\Cosmopolitan\Bundle($this->locale, $bundle);
-        return $bundle->get($key, false);
     }
 
     /**
@@ -63,9 +64,9 @@ class Intl
      * @return string
      * @throws Exception
      */
-    public function language($language): string
-    {
-        return $this->get('ICUDATA-lang', 'Languages')->get(strtolower($language));
+    public function language($language): string {
+        $bundle = $this->getBundle('ICUDATA-lang')->get('Languages');
+        return $this->get($bundle, strtolower($language));
     }
 
     /**
@@ -76,10 +77,9 @@ class Intl
      * @return string
      * @throws Exception
      */
-    public function country(string $country): string
-    {
-            $x=$this->get('ICUDATA-region', 'Countries');
-        return                  $x->get(strtoupper($country));
+    public function country(string $country): string {
+        $bundle = $this->getBundle('ICUDATA-region')->get('Countries');
+        return $this->get($bundle, strtoupper($country));
     }
 
     /**
@@ -88,25 +88,22 @@ class Intl
      * @return string
      * @throws Exception
      */
-    public function script(string $script): string
-    {
-        return $this->get('ICUDATA-lang', 'Scripts')->get(ucwords($script));
+    public function script(string $script): string {
+        return $this->getBundle('ICUDATA-lang')->get('Scripts')->get(ucwords($script));
     }
 
-    public function calendar(string $calendar): string
-    {
-        return $this->get('ICUDATA-lang', 'Types')->get('calendar')->get($calendar);
+    public function calendar(string $calendar): string {
+        return $this->getBundle('ICUDATA-lang')->get('Types')->get('calendar')->get($calendar);
     }
 
     #endregion
-    public function message(string $message, array $args): string
-    {
+    public function message(string $message, array $args): string {
         return \MessageFormatter::formatMessage($this->locale, $message, $args);
     }
 
-    public function quote(string $quote): string
-    {
-        return $this->get('ICUDATA', 'delimiters')->get('quotationStart') . $quote . $this->get('ICUDATA', 'delimiters')->get('quotationEnd');
+    public function quote(string $quote): string {
+        $bundle = $this->getBundle('ICUDATA')->get('delimiters');
+        return $bundle->get('quotationStart') . $quote . $bundle->get('quotationEnd');
     }
 
     /**
@@ -123,8 +120,7 @@ class Intl
      * @param string|null $pattern
      * @return string
      */
-    public function money(float $value, string $currency, string $pattern = ''): string
-    {
+    public function money(float $value, string $currency, string $pattern = ''): string {
         return (new \NumberFormatter($this->locale, \NumberFormatter::CURRENCY, $pattern))->formatCurrency($value, $currency);
     }
 
@@ -133,30 +129,25 @@ class Intl
      * @param int $precision
      * @return string
      */
-    public function percentage(float $value, int $precision = 3): string
-    {
+    public function percentage(float $value, int $precision = 3): string {
         $formatter = new \NumberFormatter($this->locale, \NumberFormatter::PERCENT);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, $precision);
         return $formatter->format($value);
     }
 
-    public function number(float $number): string
-    {
+    public function number(float $number): string {
         return (new \NumberFormatter($this->locale, \NumberFormatter::DEFAULT_STYLE))->format($number);
     }
 
-    public function ordinal(int $number): string
-    {
+    public function ordinal(int $number): string {
         return (new \NumberFormatter($this->locale, \NumberFormatter::ORDINAL))->format($number);
     }
 
-    public function spellout(float $number): string
-    {
+    public function spellout(float $number): string {
         return (new \NumberFormatter($this->locale, \NumberFormatter::SPELLOUT))->format($number);
     }
 
-    public function duration(float $duration): string
-    {
+    public function duration(float $duration): string {
         return $number = \NumberFormatter::create($this->locale, \NumberFormatter::DURATION)->format($duration);
     }
 
@@ -166,40 +157,29 @@ class Intl
      * @param $format
      * @return false|string
      */
-    public function customTime($value, string $format): string
-    {
+    public function customTime($value, string $format): string {
         $formatter = new \IntlDateFormatter($this->locale, null, null, $this->timezone, $this->calendarType, $format);
         return $formatter->format($value);
     }
 
-    public function date($value, int $length = self::SHORT): string
-    {
+    public function date($value, int $length = self::SHORT): string {
         return $this->datetime($value, $length, self::NONE);
     }
 
-    public function datetime($value, int $datetype = self::SHORT, int $timetype = self::MEDIUM): string
-    {
+    public function datetime($value, int $datetype = self::SHORT, int $timetype = self::MEDIUM): string {
         $calendarType = $this->useLocalCalender ? \IntlDateFormatter::TRADITIONAL : \IntlDateFormatter::GREGORIAN;
         $formatter = new \IntlDateFormatter($this->locale, $datetype, $timetype, $this->timezone, $calendarType);
         return $formatter->format($value);
     }
 
-    public function time($value, int $length = self::MEDIUM): string
-    {
+    public function time($value, int $length = self::MEDIUM): string {
         return $this->datetime($value, self::NONE, $length);
     }
 
-    private function verify($local): void
-    {
+    private function verify($local): void {
         $local = preg_replace('#-#', '_', $local);
         if (!in_array($local, \ResourceBundle::getLocales(''))) {
             throw new Exception("Invalid locale $local");
         }
     }
 }
-
-$intl = new Intl('fa', 'Australia/Sydney');
-$intl = new Intl('en', 'Australia/Sydney');
-// or using the helper $intl=intl($locale);
-var_dump($intl->country('sasdfsadfir'));
-//var_dump($intl->language('EN'));

@@ -6,6 +6,6 @@
 if (!function_exists('intl')) {
     function intl($locale)
     {
-        return new \Salarmehr\Cosmopolitan($locale);
+        return new \Salarmehr\Cosmopolitan\Intl($locale);
     }
 }
