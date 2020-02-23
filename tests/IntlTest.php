@@ -125,10 +125,10 @@ class IntlTest extends TestCase
     /**
      * @dataProvider countryProvider
      */
-    public function testCountry($local, $country, $name)
+    public function testCountry($local, $countryCode, $countryName)
     {
         $intl = new Intl($local);
-        $this->assertEquals($intl->country($country), $name);
+        $this->assertEquals($intl->country($countryCode), $countryName);
     }
 
     public function testDuration()
@@ -138,5 +138,46 @@ class IntlTest extends TestCase
 
         $actual = Intl::create('en_US')->duration(1222060, true);
         $this->assertEquals('339 hours, 27 minutes, 40 seconds', $actual);
+    }
+
+    public function unitProvider()
+    {
+        return [
+            ['en', 'digital', 'megabit', 1, 'full', '1 megabit'],
+            ['en', 'digital', 'megabit', 2, 'full', '2 megabits'],
+            ['en', 'digital', 'megabit', 1, 'medium', '1 Mb'],
+            ['en', 'digital', 'megabit', 1, 'short', '1Mb'],
+
+            ['en', 'temperature', 'celsius', 1, 'full', '1 degree Celsius'],
+            ['en', 'temperature', 'celsius', 2, 'full', '2 degrees Celsius'],
+            ['en', 'temperature', 'celsius', 1, 'medium', '1°C'],
+            ['en', 'temperature', 'celsius', 1, 'short', '1°C'],
+        ];
+    }
+
+    /**
+     * @dataProvider unitProvider
+     */
+    public function testUnit($locale, $unit, $scale, $value, $type, $expected)
+    {
+        $actual = Intl::create($locale)->unit($unit, $scale, $value, $type);
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function directionProvider()
+    {
+        return [
+            ['fa', 'rtl'],
+            ['en', 'ltr'],
+        ];
+    }
+
+    /**
+     * @dataProvider directionProvider
+     */
+    public function testDirection($locale, $expected)
+    {
+        $actual = Intl::create($locale)->direction($locale, $expected);
+        $this->assertEquals($expected, $actual);
     }
 }
