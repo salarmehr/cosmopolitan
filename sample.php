@@ -6,25 +6,26 @@ use Salarmehr\Cosmopolitan\Intl;
 
 $time = time();
 
-$locales = [
+$items = [
     ['en_AU', 'Australia/Sydney'],
     ['en_GB', 'Europe/London'],
     ['de_DE', 'Europe/Berlin'],
     ['zh_CH', 'Asia/Chongqing'],
     ['fa_IR', 'Asia/Tehran'],
     ['hi_IN', 'Asia/Jayapura'],
-    ['ar_LB', 'Asia/Muscat'],
+    ['ar_EG', 'Africa/Cairo'],
 ];
 
-foreach ($locales as $locale) {
+foreach ($items as $item) {
 
-    $intl = new Intl($locale[0], ['timezone' => $locale[1]]);
-    // or use the helper $intl=intl($locale[0],$local[1]);
+    [$locale, $timezone] = $item;
+    $intl = new Intl($locale, ['timezone' => $timezone]);
 
-    $language = $intl->language($locale[0]);
-    $country = $intl->country($locale[0]);
+    $language = $intl->language($locale);
+    $country = $intl->country($locale);
+    $flag = $intl->flag($locale);
 
-    echo "Localising some values for:  $language  ($country)" . "\n";
+    echo "$flag $country - $language" . "\n";
 
     echo $intl->spellout(10000000001) . "\n";
     echo $intl->ordinal(2) . "\n";
@@ -37,7 +38,7 @@ foreach ($locales as $locale) {
     // make sure you have exchanged the currencies if necessary before using this function.
     echo $intl->money(12.3) . "\n";
     echo $intl->currency($intl->modifiers['currency']) . "\n";
-    echo "Language direction: " . $intl->direction($locale[0]) . "\n";
+    echo "Language direction: " . $intl->direction($locale) . "\n";
 
     // unit function is experimental
     echo $intl->unit('digital', 'gigabyte', 2.19) . "\n";

@@ -51,14 +51,15 @@ class Intl extends Locale
 
     public $locale;
     public $subtags = [
-        'language' => null,
-        'region'   => null,
+        'language' => '',
+        'script'   => '',
+        'region'   => '',
     ];
 
     public $modifiers = [
         'calendar' => null, // when null, the common calendar of the locale will be used (Gregorian for most countries)
-        'currency' => null,
-        'timezone' => null,
+        'currency' => '',
+        'timezone' => '',
     ];
 
     /**
@@ -104,7 +105,7 @@ class Intl extends Locale
     /**
      * @param string $bundleName
      * @param array $path
-     * @return ResourceBundle
+     * @return ResourceBundle|string
      */
     public function get(string $bundleName, ...$path)
     {
@@ -134,9 +135,11 @@ class Intl extends Locale
      * @return string
      * @throws Exception
      */
-    public function currency(string $currencyCode, bool $getSymbol = false, bool $strict = false): string
+    public function currency(?string $currencyCode = null, bool $getSymbol = false, bool $strict = false): string
     {
+        $currencyCode = count(func_get_args()) == 0 ? $this->modifiers['currency'] : (string)$currencyCode;
         $currencyCode = strtoupper($currencyCode);
+
         $currency = $this->get(Bundle::CURRENCY, 'Currencies', $currencyCode);
 
         if ($currency === null)
@@ -156,15 +159,20 @@ class Intl extends Locale
      * @return string
      * @throws Exception
      */
-    public function language(string $language): string
+    public function language(?string $language = null): string
     {
+        $language = count(func_get_args()) == 0 ? $this->locale : $language;
+        // if the language is null or 'getDisplayLanguage' does not work as expected and returns the current local
+        if ($language === null || $language === '') return '';
         return Locale::getDisplayLanguage($language, $this->locale);
     }
 
-    public function direction(string $language): string
+    public function direction(?string $language = null): string
     {
+        $language = count(func_get_args()) == 0 ? $this->locale : (string)$language;
+
         try {
-            $dir = Bundle::create($this->locale, Bundle::LOCALE, true)['layout']['characters'] ?? null;
+            $dir = Bundle::create($language, Bundle::LOCALE, true)['layout']['characters'] ?? null;
             return $dir == 'right-to-left' ? 'rtl' : 'ltr';
         } catch (\Exception $exception) {
             return 'ltr';
@@ -176,32 +184,56 @@ class Intl extends Locale
      * @param string $country ISO 3166 country codes or a valid locale
      * @return string
      */
-    public function country(string $country): string
+    public function country(?string $country = null): string
     {
-        if (!preg_match('#[-_]#', $country)) $country = '-' . $country;
-        return Locale::getDisplayRegion($country, $this->locale);
+        if (count(func_get_args()) == 0) {
+            $country = $this->subtags['region'];
+        }
+        return Locale::getDisplayRegion('-' . $country, $this->locale);
     }
 
     /**
-     * Translate the scriptidentifier (e.g. 'zh_Hans' -> 'Simplified Chinese')
+     * Returns the emoji of a locale (e.g. AU -> Australia)
+     * @param string $country ISO 3166 country codes or a valid locale
+     * @return string
+     */
+    public function flag(?string $country = null): string
+    {
+        if (count(func_get_args()) == 0) {
+            $country = $this->subtags['region'];
+        }
+
+        $country= strtoupper($country);
+
+        // 127397 is flag offset (0x1F1E6) mines ascii offset (0x41)
+        return \IntlChar::chr(ord($country[0]) + 127397)
+            . \IntlChar::chr(ord($country[1]) + 127397);
+    }
+
+    /**
+     * Translate the script identifier (e.g. 'zh_Hans' -> 'Simplified Chinese')
+     * If no parameter is send and the scrip subtag is presented on the locale identifier, it will be used as the input
      * @param $script
      * @return string
      * @throws Exception
      */
-    public function script(string $script): string
+    public function script(?string $script = null): string
     {
-        return $this->get(Bundle::LANGUAGE, 'Scripts')->get(ucwords($script));
+        if (count(func_get_args()) == 0) {
+            $script = $this->subtags['script'];
+        }
+        $script = ucwords((string)$script);
+        return (string)$this->get(Bundle::LANGUAGE, 'Scripts', $script);
     }
 
     /**
      * Translate the calendar identifier (e.g. "buddhist" -> "Buddhist Calendar")
-     * @param $calendar
+     * @param string $calendar
      * @return string
-     * @throws Exception
      */
     public function calendar(string $calendar): string
     {
-        return $this->get(Bundle::LANGUAGE, 'Types')->get('calendar')->get($calendar);
+        return (string)$this->get(Bundle::LANGUAGE, 'Types', 'calendar', $calendar);
     }
 
     #endregion
@@ -221,6 +253,7 @@ class Intl extends Locale
      * @param string $currency The 3-letter ISO 4217 currency code indicating the currency to use.
      * @param string|null $pattern
      * @return string
+     * @throws Exception
      */
     public function money(float $value, string $currency = null, string $pattern = ''): string
     {

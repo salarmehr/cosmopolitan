@@ -18,7 +18,6 @@
       "Salarmehr\\Cosmopolitan\\": "src/"
     },
     "files": [
-      "src/helper.php"
     ]
   },
   "require-dev": {

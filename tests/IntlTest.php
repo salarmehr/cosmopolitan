@@ -117,18 +117,39 @@ class IntlTest extends TestCase
     {
         return [
             ['en', 'AU', 'Australia'],
-            ['en', 'en_AU', 'Australia'],
+            ['en_AU', 'AU', 'Australia'],
             ['fa', 'AU', 'استرالیا'],
+            ['fa', '', ''],
+            ['fa', null, ''],
         ];
     }
 
     /**
      * @dataProvider countryProvider
      */
-    public function testCountry($local, $countryCode, $countryName)
+    public function testCountry($locale, $countryCode, $countryName)
     {
-        $intl = new Intl($local);
+        $intl = new Intl($locale);
         $this->assertEquals($intl->country($countryCode), $countryName);
+    }
+
+    public function calendarProvider()
+    {
+        return [
+            ['en', 'persian', 'Persian Calendar'],
+            ['en_AU', 'buddhist', 'Buddhist Calendar'],
+            ['fa', 'buddhist', 'تقویم بودایی'],
+            ['fa', '', ''],
+        ];
+    }
+
+    /**
+     * @dataProvider calendarProvider
+     */
+    public function testCalendar($locale, $calendarCode, $calendarName)
+    {
+        $intl = new Intl($locale);
+        $this->assertEquals($intl->calendar($calendarCode), $calendarName);
     }
 
     public function testDuration()
@@ -179,5 +200,44 @@ class IntlTest extends TestCase
     {
         $actual = Intl::create($locale)->direction($locale, $expected);
         $this->assertEquals($expected, $actual);
+    }
+
+    public function testMethodWithoutParameter()
+    {
+        $intl = new Intl('en_AU');
+        $this->assertEquals('Australia', $intl->country());
+        $this->assertEquals('', $intl->country(''));
+        $this->assertEquals('', $intl->country(null));
+
+        $this->assertEquals('English', $intl->language());
+        $this->assertEquals('', $intl->language(''));
+        $this->assertEquals('', $intl->language(null));
+
+        $this->assertEquals('Australian Dollar', $intl->currency());
+        $this->assertEquals('', $intl->currency(''));
+        $this->assertEquals('', $intl->currency(null));
+
+        $this->assertEquals('ltr', $intl->direction());
+
+        $intl = new Intl('en');
+        $this->assertEquals('', $intl->country());
+        $this->assertEquals('', $intl->country(''));
+        $this->assertEquals('', $intl->country(null));
+
+        $this->assertEquals('English', $intl->language());
+        $this->assertEquals('', $intl->language(''));
+        $this->assertEquals('', $intl->language(null));
+
+        $this->assertEquals('', $intl->currency());
+        $this->assertEquals('', $intl->currency(''));
+        $this->assertEquals('', $intl->currency(null));
+        $this->assertEquals('', $intl->script());
+
+        $intl = new Intl('en_Latn_AU');
+        $this->assertEquals('Latin', $intl->script());
+        $this->assertEquals('', $intl->script(''));
+
+        $this->assertEquals('ltr', $intl->direction());
+        $this->assertEquals('🇦🇺', $intl->flag());
     }
 }

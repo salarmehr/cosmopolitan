@@ -52,27 +52,26 @@ use Salarmehr\Cosmopolitan\Intl;
 
 $time = time();
 
-// Locale identifier, Timezone, Currency code
-// just time zone and currey are optional.
-$locales = [
+$items = [
     ['en_AU', 'Australia/Sydney'],
     ['en_GB', 'Europe/London'],
     ['de_DE', 'Europe/Berlin'],
     ['zh_CH', 'Asia/Chongqing'],
     ['fa_IR', 'Asia/Tehran'],
     ['hi_IN', 'Asia/Jayapura'],
-    ['ar_LB', 'Asia/Muscat'],
+    ['ar_EG', 'Africa/Cairo'],
 ];
 
-foreach ($locales as $locale) {
+foreach ($items as $item) {
 
-    $intl = new Intl($locale[0], ['timezone' => $locale[1]]);
-    // or use the helper $intl=intl($locale[0],$local[1]);
+    [$locale, $timezone] = $item;
+    $intl = new Intl($locale, ['timezone' => $timezone]);
 
-    $language = $intl->language($locale[0]);
-    $country = $intl->country($locale[0]);
+    $language = $intl->language($locale);
+    $country = $intl->country($locale);
+    $flag = $intl->flag($locale);
 
-    echo "Localising some values for:  $language  ($country )" . "\n";
+    echo "$flag $country - $language)" . "\n";
 
     echo $intl->spellout(10000000001) . "\n";
     echo $intl->ordinal(2) . "\n";
@@ -85,9 +84,12 @@ foreach ($locales as $locale) {
     // make sure you have exchanged the currencies if necessary before using this function.
     echo $intl->money(12.3) . "\n";
     echo $intl->currency($intl->modifiers['currency']) . "\n";
-    echo "Language direction: " . $intl->direction($locale[0]) . "\n";
+    echo "Language direction: " . $intl->direction($locale) . "\n";
+
+    // unit function is experimental
     echo $intl->unit('digital', 'gigabyte', 2.19) . "\n";
     echo $intl->unit('digital', 'gigabyte', 2.19, 'medium') . "\n";
+    echo $intl->unit('mass', 'gram', 120) . "\n"; // default is full
 
 
     // you can send 'short','medium','long' or 'full
@@ -100,8 +102,7 @@ foreach ($locales as $locale) {
 ~~~
 will output:
 ~~~
-D:\server\php\php.exe D:\www\locale\sample.php
-Localising some values for:  English  (Australia )
+🇪🇳 EN - English)
 ten billion one
 2nd
 “Quoted text!”
@@ -113,11 +114,12 @@ Australian Dollar
 Language direction: ltr
 2.19 gigabytes
 2.19 GB
-4/3/20, 7:45 pm
-7:45:21 pm Australian Eastern Daylight Time
-Wednesday, 4 March 2020
+120 grams
+7/3/20, 4:41 pm
+4:41:39 pm Australian Eastern Daylight Time
+Saturday, 7 March 2020
 
-Localising some values for:  English  (United Kingdom )
+🇪🇳 EN - English)
 ten billion one
 2nd
 “Quoted text!”
@@ -129,11 +131,12 @@ British Pound
 Language direction: ltr
 2.19 gigabytes
 2.19 GB
-04/03/2020, 08:45
-08:45:21 Greenwich Mean Time
-Wednesday, 4 March 2020
+120 grams
+07/03/2020, 05:41
+05:41:39 Greenwich Mean Time
+Saturday, 7 March 2020
 
-Localising some values for:  Deutsch  (Deutschland )
+🇩🇪 Deutschland - Deutsch)
 zehn Milliarden eins
 2.
 „Quoted text!“
@@ -145,11 +148,12 @@ Euro
 Language direction: ltr
 2,19 Gigabytes
 2,19 GB
-04.03.20, 09:45
-09:45:21 Mitteleuropäische Normalzeit
-Mittwoch, 4. März 2020
+120 Gramm
+07.03.20, 06:41
+06:41:39 Mitteleuropäische Normalzeit
+Samstag, 7. März 2020
 
-Localising some values for:  中文  (瑞士 )
+🇿🇭 ZH - 中文)
 一百亿〇一
 第2
 “Quoted text!”
@@ -161,11 +165,12 @@ CHF 12.30
 Language direction: ltr
 2.19吉字节
 2.19吉字节
-2020/3/4 下午4:45
-中国标准时间 下午4:45:21
-2020年3月4日星期三
+120克
+2020/3/7 下午1:41
+中国标准时间 下午1:41:39
+2020年3月7日星期六
 
-Localising some values for:  فارسی  (ایران )
+🇫🇦 FA - فارسی)
 ده میلیارد و یک
 ۲.
 «Quoted text!»
@@ -177,11 +182,12 @@ Localising some values for:  فارسی  (ایران )
 Language direction: rtl
 ۲٫۱۹ گیگابایت
 ۲٫۱۹ گیگابایت
-۱۳۹۸/۱۲/۱۴،‏ ۱۲:۱۵
-۱۲:۱۵:۲۱ (وقت عادی ایران)
-۱۳۹۸ اسفند ۱۴, چهارشنبه
+۱۲۰ گرم
+۱۳۹۸/۱۲/۱۷،‏ ۹:۱۱
+۹:۱۱:۳۹ (وقت عادی ایران)
+۱۳۹۸ اسفند ۱۷, شنبه
 
-Localising some values for:  हिन्दी  (भारत )
+🇭🇮 HI - हिन्दी)
 दस अरब एक
 2रा
 “Quoted text!”
@@ -193,27 +199,28 @@ Localising some values for:  हिन्दी  (भारत )
 Language direction: ltr
 2.19 गीगाबाइट
 2.19 GB
-4/3/20, 5:45 pm
-5:45:21 pm पूर्वी इंडोनेशिया समय
-बुधवार, 4 मार्च 2020
+120 ग्राम
+7/3/20, 2:41 pm
+2:41:39 pm पूर्वी इंडोनेशिया समय
+शनिवार, 7 मार्च 2020
 
-Localising some values for:  العربية  (لبنان )
+🇦🇷 الأرجنتين - العربية)
 عشرة مليار و واحد
 ٢.
 ”Quoted text!“
 ١٢٣٬٤٠٠٫٥٦٧
 ١٤٪؜
 ٥٩٩
-١٢ ل.ل.‏
-جنيه لبناني
+١٢٫٣٠ ج.م.‏
+جنيه مصري
 Language direction: rtl
 ٢٫١٩ غيغابايت
 ٢٫١٩ غيغابايت
-٤‏/٣‏/٢٠٢٠ ١٢:٤٥ م
-١٢:٤٥:٢١ م توقيت الخليج
-الأربعاء، ٤ آذار ٢٠٢٠
+١٢٠ غرامًا
+٧‏/٣‏/٢٠٢٠ ٧:٤١ ص
+٧:٤١:٣٩ ص توقيت شرق أوروبا الرسمي
+السبت، ٧ مارس ٢٠٢٠
 ~~~
-
 Licence
 =======
 MIT
