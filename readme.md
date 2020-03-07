@@ -39,13 +39,36 @@ echo Intl::create('fr')->spellout(5000000); // prints: "cinq millions"
 echo Intl::create('en_US')->money(11000.4,'USD'); // prints: "$11,000.40"
 ~~~
 
+Licence
+=======
+MIT
+
+Links
+=====
+- [Locale Explorer](http://demo.icu-project.org/icu-bin/locexp)
+- [ICU Data](https://github.com/unicode-org/icu/tree/release-65-1/icu4c/source/data)
+- [ICU data tables by Alexander Makarov](https://intl.rmcreative.ru/)
+- [Online ICU Message Editor](https://format-message.github.io/icu-message-format-for-translators/)
+
+Changes
+=======
+* v0.3 
+  - Adding `unit` localiser method
+  - Adding `direction` method to detect the direction of language (rtl or ltr)
+  - Adding createFromHttp()
+  - Adding createFromSubtags
+  - Detecting a default currency code from locale identifier
+  - Dividing options param to subtags and modifiers 
+
+How to collaborate?
+=================
+ Help by creating PR or in any way you can ☺ 
+
 Example
 --------
-The following example demonstrates a subset of available functions.
-Please check the  `\src\Intl.php` to find out all available features.
+
 ~~~php
-<?php
-// example.php
+<?php // example.php
 require_once 'vendor/autoload.php';
 
 use Salarmehr\Cosmopolitan\Intl;
@@ -69,9 +92,9 @@ foreach ($items as $item) {
 
     $language = $intl->language($locale);
     $country = $intl->country($locale);
-    $flag = $intl->flag($locale);
+    $flag = $intl->flag($intl->subtags['region']);
 
-    echo "$flag $country - $language)" . "\n";
+    echo "$flag $country - $language" . "\n";
 
     echo $intl->spellout(10000000001) . "\n";
     echo $intl->ordinal(2) . "\n";
@@ -100,9 +123,10 @@ foreach ($items as $item) {
     echo PHP_EOL;
 }
 ~~~
-will output:
+
+prints
 ~~~
-🇪🇳 EN - English)
+🇦🇺 Australia - English
 ten billion one
 2nd
 “Quoted text!”
@@ -115,11 +139,11 @@ Language direction: ltr
 2.19 gigabytes
 2.19 GB
 120 grams
-7/3/20, 4:41 pm
-4:41:39 pm Australian Eastern Daylight Time
+7/3/20, 9:50 pm
+9:50:33 pm Australian Eastern Daylight Time
 Saturday, 7 March 2020
 
-🇪🇳 EN - English)
+🇬🇧 United Kingdom - English
 ten billion one
 2nd
 “Quoted text!”
@@ -132,11 +156,11 @@ Language direction: ltr
 2.19 gigabytes
 2.19 GB
 120 grams
-07/03/2020, 05:41
-05:41:39 Greenwich Mean Time
+07/03/2020, 10:50
+10:50:33 Greenwich Mean Time
 Saturday, 7 March 2020
 
-🇩🇪 Deutschland - Deutsch)
+🇩🇪 Deutschland - Deutsch
 zehn Milliarden eins
 2.
 „Quoted text!“
@@ -149,11 +173,11 @@ Language direction: ltr
 2,19 Gigabytes
 2,19 GB
 120 Gramm
-07.03.20, 06:41
-06:41:39 Mitteleuropäische Normalzeit
+07.03.20, 11:50
+11:50:33 Mitteleuropäische Normalzeit
 Samstag, 7. März 2020
 
-🇿🇭 ZH - 中文)
+🇨🇭 瑞士 - 中文
 一百亿〇一
 第2
 “Quoted text!”
@@ -166,11 +190,11 @@ Language direction: ltr
 2.19吉字节
 2.19吉字节
 120克
-2020/3/7 下午1:41
-中国标准时间 下午1:41:39
+2020/3/7 下午6:50
+中国标准时间 下午6:50:33
 2020年3月7日星期六
 
-🇫🇦 FA - فارسی)
+🇮🇷 ایران - فارسی
 ده میلیارد و یک
 ۲.
 «Quoted text!»
@@ -183,11 +207,11 @@ Language direction: rtl
 ۲٫۱۹ گیگابایت
 ۲٫۱۹ گیگابایت
 ۱۲۰ گرم
-۱۳۹۸/۱۲/۱۷،‏ ۹:۱۱
-۹:۱۱:۳۹ (وقت عادی ایران)
+۱۳۹۸/۱۲/۱۷،‏ ۱۴:۲۰
+۱۴:۲۰:۳۳ (وقت عادی ایران)
 ۱۳۹۸ اسفند ۱۷, شنبه
 
-🇭🇮 HI - हिन्दी)
+🇮🇳 भारत - हिन्दी
 दस अरब एक
 2रा
 “Quoted text!”
@@ -200,11 +224,11 @@ Language direction: ltr
 2.19 गीगाबाइट
 2.19 GB
 120 ग्राम
-7/3/20, 2:41 pm
-2:41:39 pm पूर्वी इंडोनेशिया समय
+7/3/20, 7:50 pm
+7:50:33 pm पूर्वी इंडोनेशिया समय
 शनिवार, 7 मार्च 2020
 
-🇦🇷 الأرجنتين - العربية)
+🇪🇬 مصر - العربية
 عشرة مليار و واحد
 ٢.
 ”Quoted text!“
@@ -217,9 +241,11 @@ Language direction: rtl
 ٢٫١٩ غيغابايت
 ٢٫١٩ غيغابايت
 ١٢٠ غرامًا
-٧‏/٣‏/٢٠٢٠ ٧:٤١ ص
-٧:٤١:٣٩ ص توقيت شرق أوروبا الرسمي
+٧‏/٣‏/٢٠٢٠ ١٢:٥٠ م
+١٢:٥٠:٣٣ م توقيت شرق أوروبا الرسمي
 السبت، ٧ مارس ٢٠٢٠
+
+
 ~~~
 Licence
 =======
@@ -245,3 +271,4 @@ Changes
 How to collaborate?
 =================
  Help by creating PR or in any way you can ☺ 
+

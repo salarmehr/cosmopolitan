@@ -188,8 +188,14 @@ class Intl extends Locale
     {
         if (count(func_get_args()) == 0) {
             $country = $this->subtags['region'];
+        } elseif (!$country) {
+            return '';
         }
-        return Locale::getDisplayRegion('-' . $country, $this->locale);
+
+        if (!preg_match('#[-_]#', (string)$country)) {
+            $country = '_' . $country;
+        }
+        return Locale::getDisplayRegion($country, $this->locale);
     }
 
     /**
@@ -203,7 +209,7 @@ class Intl extends Locale
             $country = $this->subtags['region'];
         }
 
-        $country= strtoupper($country);
+        $country = strtoupper($country);
 
         // 127397 is flag offset (0x1F1E6) mines ascii offset (0x41)
         return \IntlChar::chr(ord($country[0]) + 127397)
@@ -328,7 +334,12 @@ class Intl extends Locale
 
     /**
      * Localise time, date, or date+time. Allowed types are none, short, medium, long and full.
-     * @param $value
+     * @param mixed $value Value to format. This may be
+     * a DateTimeInterface object,
+     * an IntlCalendar object,
+     * a numeric type representing a (possibly fractional) number of seconds since epoch
+     * or an array in the format output by localtime().
+     * If a DateTime or an IntlCalendar object is passed, its timezone is not considered. The object will be formatted using the formaterʼs configured timezone. If one wants to use the timezone of the object to be formatted, IntlDateFormatter::setTimeZone() must be called before with the objectʼs timezone. Alternatively, the static function IntlDateFormatter::formatObject() may be used instead.
      * @param string $dateType
      * @param string $timeType
      * @return string
@@ -341,7 +352,11 @@ class Intl extends Locale
 
         $calendarType = $this->modifiers['calendar'] == null ? IntlDateFormatter::TRADITIONAL : IntlDateFormatter::GREGORIAN;
         $formatter = new IntlDateFormatter($this->locale, $dateType, $timeType, $this->modifiers['timezone'], $calendarType);
-        return $formatter->format($value);
+        $result = $formatter->format($value);
+        if (intl_is_failure($formatter->getErrorCode())) {
+            throw new Exception($formatter->getErrorMessage(), $formatter->getErrorCode());
+        }
+        return $result;
     }
 
     public function date($value, string $type = 'short'): string
