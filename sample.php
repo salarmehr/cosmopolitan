@@ -1,5 +1,4 @@
-<?php
-// example.php
+<?php // example.php
 require_once 'vendor/autoload.php';
 
 use Salarmehr\Cosmopolitan\Intl;
@@ -21,9 +20,9 @@ foreach ($items as $item) {
     [$locale, $timezone] = $item;
     $intl = new Intl($locale, ['timezone' => $timezone]);
 
-    $language = $intl->language($locale);
-    $country = $intl->country($locale);
-    $flag = $intl->flag($locale);
+    $language = $intl->language();
+    $country = $intl->country();
+    $flag = $intl->flag(); // emoji flag of the country
 
     echo "$flag $country - $language" . "\n";
 
@@ -38,7 +37,7 @@ foreach ($items as $item) {
     // make sure you have exchanged the currencies if necessary before using this function.
     echo $intl->money(12.3) . "\n";
     echo $intl->currency($intl->modifiers['currency']) . "\n";
-    echo "Language direction: " . $intl->direction($locale) . "\n";
+    echo "Language direction: " . $intl->direction() . "\n";
 
     // unit function is experimental
     echo $intl->unit('digital', 'gigabyte', 2.19) . "\n";
