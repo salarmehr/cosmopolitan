@@ -4,7 +4,9 @@ namespace Salarmehr\Cosmopolitan;
 
 use PHPUnit\Framework\TestCase;
 
-class IntlTest extends TestCase
+require_once __DIR__ . '/../src/helper.php';
+
+class CosmoTest extends TestCase
 {
     public function languageProvider()
     {
@@ -21,13 +23,19 @@ class IntlTest extends TestCase
      */
     public function testLanguage($local, $language, $name)
     {
-        $intl = new Intl($local);
-        $this->assertEquals($intl->language($language), $name);
+        $cosmo = new Cosmo($local);
+        $this->assertEquals($cosmo->language($language), $name);
+    }
+
+    public function testHelper()
+    {
+        $actual = cosmo('tu')->unit('temperature', 'celsius', 26);
+        $this->assertEquals('26°C', $actual);
     }
 
     public function testPercentage()
     {
-        $actual = Intl::create('en_AU')->percentage(.2);
+        $actual = Cosmo::create('en_AU')->percentage(.2);
         $this->assertEquals('20%', $actual);
     }
 
@@ -48,13 +56,13 @@ class IntlTest extends TestCase
      */
     public function testQuote($local, $text, $quote)
     {
-        $intl = new Intl($local);
-        $this->assertEquals($intl->quote($text), $quote);
+        $cosmo = new Cosmo($local);
+        $this->assertEquals($cosmo->quote($text), $quote);
     }
 
     public function testGet()
     {
-        $actual = Intl::create('en_AU')->get(Bundle::LOCALE, 'listPattern')->get('standard')->get('end');
+        $actual = Cosmo::create('en_AU')->get(Bundle::LOCALE, 'listPattern')->get('standard')->get('end');
         $this->assertEquals('{0} and {1}', $actual);
     }
 
@@ -82,34 +90,34 @@ class IntlTest extends TestCase
      */
     public function testMessage($local, $text, $arguments, $message)
     {
-        $intl = new Intl($local);
-        $this->assertEquals($intl->message($text, $arguments), $message);
+        $cosmo = new Cosmo($local);
+        $this->assertEquals($cosmo->message($text, $arguments), $message);
     }
 
     public function testCurrency()
     {
-        $actual = Intl::create('en_AU')->currency('aud');
+        $actual = Cosmo::create('en_AU')->currency('aud');
         $this->assertEquals('Australian Dollar', $actual);
 
-        $actual = Intl::create('en_AU')->currency('aud', true);
+        $actual = Cosmo::create('en_AU')->currency('aud', true);
         $this->assertEquals('$', $actual);
 
         $this->expectException(Exception::class);
-        Intl::create('en_AU')->currency('foo', false, true);
+        Cosmo::create('en_AU')->currency('foo', false, true);
     }
 
     public function testMoney()
     {
-        $actual = Intl::create('en_AU')->money(12.3, 'aud');
+        $actual = Cosmo::create('en_AU')->money(12.3, 'aud');
         $this->assertEquals('$12.30', $actual);
 
-        $actual = Intl::create('en_US')->money(12.3, 'aud');
+        $actual = Cosmo::create('en_US')->money(12.3, 'aud');
         $this->assertEquals('A$12.30', $actual);
     }
 
     public function testOrdinal()
     {
-        $actual = Intl::create('en_AU')->ordinal(1);
+        $actual = Cosmo::create('en_AU')->ordinal(1);
         $this->assertEquals('1st', $actual);
     }
 
@@ -129,8 +137,8 @@ class IntlTest extends TestCase
      */
     public function testCountry($locale, $countryCode, $countryName)
     {
-        $intl = new Intl($locale);
-        $this->assertEquals($intl->country($countryCode), $countryName);
+        $cosmo = new Cosmo($locale);
+        $this->assertEquals($cosmo->country($countryCode), $countryName);
     }
 
     public function calendarProvider()
@@ -148,16 +156,16 @@ class IntlTest extends TestCase
      */
     public function testCalendar($locale, $calendarCode, $calendarName)
     {
-        $intl = new Intl($locale);
-        $this->assertEquals($intl->calendar($calendarCode), $calendarName);
+        $cosmo = new Cosmo($locale);
+        $this->assertEquals($cosmo->calendar($calendarCode), $calendarName);
     }
 
     public function testDuration()
     {
-        $actual = Intl::create('en_US')->duration(1222060);
+        $actual = Cosmo::create('en_US')->duration(1222060);
         $this->assertEquals('339:27:40', $actual);
 
-        $actual = Intl::create('en_US')->duration(1222060, true);
+        $actual = Cosmo::create('en_US')->duration(1222060, true);
         $this->assertEquals('339 hours, 27 minutes, 40 seconds', $actual);
     }
 
@@ -181,7 +189,7 @@ class IntlTest extends TestCase
      */
     public function testUnit($locale, $unit, $scale, $value, $type, $expected)
     {
-        $actual = Intl::create($locale)->unit($unit, $scale, $value, $type);
+        $actual = Cosmo::create($locale)->unit($unit, $scale, $value, $type);
         $this->assertEquals($expected, $actual);
     }
 
@@ -198,46 +206,46 @@ class IntlTest extends TestCase
      */
     public function testDirection($locale, $expected)
     {
-        $actual = Intl::create($locale)->direction($locale, $expected);
+        $actual = Cosmo::create($locale)->direction($locale, $expected);
         $this->assertEquals($expected, $actual);
     }
 
     public function testMethodWithoutParameter()
     {
-        $intl = new Intl('en_AU');
-        $this->assertEquals('Australia', $intl->country());
-        $this->assertEquals('', $intl->country(''));
-        $this->assertEquals('', $intl->country(null));
+        $cosmo = new Cosmo('en_AU');
+        $this->assertEquals('Australia', $cosmo->country());
+        $this->assertEquals('', $cosmo->country(''));
+        $this->assertEquals('', $cosmo->country(null));
 
-        $this->assertEquals('English', $intl->language());
-        $this->assertEquals('', $intl->language(''));
-        $this->assertEquals('', $intl->language(null));
+        $this->assertEquals('English', $cosmo->language());
+        $this->assertEquals('', $cosmo->language(''));
+        $this->assertEquals('', $cosmo->language(null));
 
-        $this->assertEquals('Australian Dollar', $intl->currency());
-        $this->assertEquals('', $intl->currency(''));
-        $this->assertEquals('', $intl->currency(null));
+        $this->assertEquals('Australian Dollar', $cosmo->currency());
+        $this->assertEquals('', $cosmo->currency(''));
+        $this->assertEquals('', $cosmo->currency(null));
 
-        $this->assertEquals('ltr', $intl->direction());
+        $this->assertEquals('ltr', $cosmo->direction());
 
-        $intl = new Intl('en');
-        $this->assertEquals('', $intl->country());
-        $this->assertEquals('', $intl->country(''));
-        $this->assertEquals('', $intl->country(null));
+        $cosmo = new Cosmo('en');
+        $this->assertEquals('', $cosmo->country());
+        $this->assertEquals('', $cosmo->country(''));
+        $this->assertEquals('', $cosmo->country(null));
 
-        $this->assertEquals('English', $intl->language());
-        $this->assertEquals('', $intl->language(''));
-        $this->assertEquals('', $intl->language(null));
+        $this->assertEquals('English', $cosmo->language());
+        $this->assertEquals('', $cosmo->language(''));
+        $this->assertEquals('', $cosmo->language(null));
 
-        $this->assertEquals('', $intl->currency());
-        $this->assertEquals('', $intl->currency(''));
-        $this->assertEquals('', $intl->currency(null));
-        $this->assertEquals('', $intl->script());
+        $this->assertEquals('', $cosmo->currency());
+        $this->assertEquals('', $cosmo->currency(''));
+        $this->assertEquals('', $cosmo->currency(null));
+        $this->assertEquals('', $cosmo->script());
 
-        $intl = new Intl('en_Latn_AU');
-        $this->assertEquals('Latin', $intl->script());
-        $this->assertEquals('', $intl->script(''));
+        $cosmo = new Cosmo('en_Latn_AU');
+        $this->assertEquals('Latin', $cosmo->script());
+        $this->assertEquals('', $cosmo->script(''));
 
-        $this->assertEquals('ltr', $intl->direction());
-        $this->assertEquals('🇦🇺', $intl->flag());
+        $this->assertEquals('ltr', $cosmo->direction());
+        $this->assertEquals('🇦🇺', $cosmo->flag());
     }
 }

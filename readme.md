@@ -16,12 +16,14 @@ Cosmopolitan supports localisation of
 - Time (from milliseconds to era)
 - Numbers
 - Percentage
-- Ordinal Numbers
+- Ordinal numbers
 - Quoting text
 - Translating the name of languages and countries
 - Spelling out of numbers
 - Duration
 - Units (SI and U.S.)
+- Translation of countries name, languages, scripts, calendars, etc.
+- [ICU Messages](http://userguide.icu-project.org/formatparse/messages) (pluralisation, word gender selection, ...)
 - ...
 
 Installation
@@ -31,39 +33,15 @@ Make sure the `php-intl` extension is installed and enabled by checking both `ph
 composer require salarmehr/cosmopolitan
 ~~~ 
 
-Set the Locale identifier (language_COUNTRY) and you are ready to go
+Set the Locale identifier (langauge_COUNTRY) and you are ready to go
 ~~~php
-use Salarmehr\Cosmopolitan\Intl;
-
-echo Intl::create('en')->spellout(5000000); // five million - English
-echo Intl::create('es_ES')->money(11000.4); // 11.000,40 € - Spanish (Spain)
-echo Intl::create('tu')->unit('temperature','celsius',26); // 26°C - Turkish
+use Salarmehr\Cosmopolitan\Cosmo;
+echo Cosmo::create('en')->spellout(5000000); // five million - English
+echo Cosmo::create('es_ES')->money(11000.4); // 11.000,40 € - Spanish (Spain)
+echo Cosmo::create('tu')->unit('temperature','celsius',26); // 26°C - Turkish
 ~~~
-
-Licence
-=======
-MIT
-
-Links
-=====
-- [Locale Explorer](http://demo.icu-project.org/icu-bin/locexp)
-- [ICU Data](https://github.com/unicode-org/icu/tree/release-65-1/icu4c/source/data)
-- [ICU data tables by Alexander Makarov](https://intl.rmcreative.ru/)
-- [Online ICU Message Editor](https://format-message.github.io/icu-message-format-for-translators/)
-
-Changes
-=======
-* v0.3 
-  - Adding `unit` localiser method
-  - Adding `direction` method to detect the direction of language (rtl or ltr)
-  - Adding createFromHttp()
-  - Adding createFromSubtags
-  - Detecting a default currency code from locale identifier
-  - Dividing options param to subtags and modifiers 
-
-How to collaborate?
-=================
- Help by creating PR or in any way you can ☺ 
+Or you can use the helper function (it is not loaded by default). 
+e.g. `echo cosmo('en')->spellout(120)` prints "one hundred twenty". 
 
 Example
 --------
@@ -72,9 +50,8 @@ Example
 <?php // example.php
 require_once 'vendor/autoload.php';
 
-use Salarmehr\Cosmopolitan\Intl;
+use Salarmehr\Cosmopolitan\Cosmo;
 
-$time = time();
 
 $items = [
     ['en_AU', 'Australia/Sydney'],
@@ -89,38 +66,39 @@ $items = [
 foreach ($items as $item) {
 
     [$locale, $timezone] = $item;
-    $intl = new Intl($locale, ['timezone' => $timezone]);
+    $cosmo = new Cosmo($locale, ['timezone' => $timezone]);
 
-    $language = $intl->language();
-    $country = $intl->country();
-    $flag = $intl->flag(); // emoji flag of the country
+    $language = $cosmo->language();
+    $country = $cosmo->country();
+    $flag = $cosmo->flag(); // emoji flag of the country
 
     echo "$flag $country - $language" . "\n";
 
-    echo $intl->spellout(10000000001) . "\n";
-    echo $intl->ordinal(2) . "\n";
-    echo $intl->quote("Quoted text!") . "\n";
-    echo $intl->number(123400.567) . "\n";
-    echo $intl->percentage(.14) . "\n";
-    echo $intl->duration(599) . "\n";
+    echo $cosmo->spellout(10000000001) . "\n";
+    echo $cosmo->ordinal(2) . "\n";
+    echo $cosmo->quote("Quoted text!") . "\n";
+    echo $cosmo->number(123400.567) . "\n";
+    echo $cosmo->percentage(.14) . "\n";
+    echo $cosmo->duration(599) . "\n";
     // ِ The currency code can be passed as the second argument or passed as an item of the modifiers array
     // otherwise the currency of the region will be used
     // make sure you have exchanged the currencies if necessary before using this function.
-    echo $intl->money(12.3) . "\n";
-    echo $intl->currency($intl->modifiers['currency']) . "\n";
-    echo "Language direction: " . $intl->direction() . "\n";
+    echo $cosmo->money(12.3) . "\n";
+    echo $cosmo->currency($cosmo->modifiers['currency']) . "\n";
+    echo "Language direction: " . $cosmo->direction() . "\n";
 
     // unit function is experimental
-    echo $intl->unit('digital', 'gigabyte', 2.19) . "\n";
-    echo $intl->unit('digital', 'gigabyte', 2.19, 'medium') . "\n";
-    echo $intl->unit('mass', 'gram', 120) . "\n"; // default is full
+    echo $cosmo->unit('digital', 'gigabyte', 2.19) . "\n";
+    echo $cosmo->unit('digital', 'gigabyte', 2.19, 'medium') . "\n";
+    echo $cosmo->unit('mass', 'gram', 120) . "\n"; // default is full
 
 
     // you can send 'short','medium','long' or 'full
     // as an argument to set the type of time or date.
-    echo $intl->moment($time) . "\n"; // data and time
-    echo $intl->time($time, 'full') . "\n";
-    echo $intl->date($time, 'full') . "\n";
+    $time = new DateTime('2020/01/02 09:25:30');
+    echo $cosmo->moment($time) . "\n"; // data and time
+    echo $cosmo->time($time, 'full') . "\n";
+    echo $cosmo->date($time, 'full') . "\n";
     echo PHP_EOL;
 }
 ~~~
@@ -140,9 +118,9 @@ Language direction: ltr
 2.19 gigabytes
 2.19 GB
 120 grams
-9/3/20, 9:39 pm
-9:39:17 pm Australian Eastern Daylight Time
-Monday, 9 March 2020
+2/1/20, 8:25 pm
+8:25:30 pm Australian Eastern Daylight Time
+Thursday, 2 January 2020
 
 🇬🇧 United Kingdom - English
 ten billion one
@@ -157,9 +135,9 @@ Language direction: ltr
 2.19 gigabytes
 2.19 GB
 120 grams
-09/03/2020, 10:39
-10:39:17 Greenwich Mean Time
-Monday, 9 March 2020
+02/01/2020, 09:25
+09:25:30 Greenwich Mean Time
+Thursday, 2 January 2020
 
 🇩🇪 Deutschland - Deutsch
 zehn Milliarden eins
@@ -174,9 +152,9 @@ Language direction: ltr
 2,19 Gigabytes
 2,19 GB
 120 Gramm
-09.03.20, 11:39
-11:39:17 Mitteleuropäische Normalzeit
-Montag, 9. März 2020
+02.01.20, 10:25
+10:25:30 Mitteleuropäische Normalzeit
+Donnerstag, 2. Januar 2020
 
 🇨🇭 瑞士 - 中文
 一百亿〇一
@@ -191,9 +169,9 @@ Language direction: ltr
 2.19吉字节
 2.19吉字节
 120克
-2020/3/9 下午6:39
-中国标准时间 下午6:39:17
-2020年3月9日星期一
+2020/1/2 下午5:25
+中国标准时间 下午5:25:30
+2020年1月2日星期四
 
 🇮🇷 ایران - فارسی
 ده میلیارد و یک
@@ -208,9 +186,9 @@ Language direction: rtl
 ۲٫۱۹ گیگابایت
 ۲٫۱۹ گیگابایت
 ۱۲۰ گرم
-۱۳۹۸/۱۲/۱۹،‏ ۱۴:۰۹
-۱۴:۰۹:۱۷ (وقت عادی ایران)
-۱۳۹۸ اسفند ۱۹, دوشنبه
+۱۳۹۸/۱۰/۱۲،‏ ۱۲:۵۵
+۱۲:۵۵:۳۰ (وقت عادی ایران)
+۱۳۹۸ دی ۱۲, پنجشنبه
 
 🇮🇳 भारत - हिन्दी
 दस अरब एक
@@ -225,9 +203,9 @@ Language direction: ltr
 2.19 गीगाबाइट
 2.19 GB
 120 ग्राम
-9/3/20, 7:39 pm
-7:39:17 pm पूर्वी इंडोनेशिया समय
-सोमवार, 9 मार्च 2020
+2/1/20, 6:25 pm
+6:25:30 pm पूर्वी इंडोनेशिया समय
+गुरुवार, 2 जनवरी 2020
 
 🇪🇬 مصر - العربية
 عشرة مليار و واحد
@@ -242,9 +220,9 @@ Language direction: rtl
 ٢٫١٩ غيغابايت
 ٢٫١٩ غيغابايت
 ١٢٠ غرامًا
-٩‏/٣‏/٢٠٢٠ ١٢:٣٩ م
-١٢:٣٩:١٧ م توقيت شرق أوروبا الرسمي
-الاثنين، ٩ مارس ٢٠٢٠
+٢‏/١‏/٢٠٢٠ ١١:٢٥ ص
+١١:٢٥:٣٠ ص توقيت شرق أوروبا الرسمي
+الخميس، ٢ يناير ٢٠٢٠
 
 
 ~~~
@@ -261,6 +239,13 @@ Links
 
 Changes
 =======
+* v0.5
+  - Main class is renamed from Intl to Cosmo
+  
+* v0.4
+  - Addling flag method to return the emoji flag of the locale
+  - Making the input of country, language, direction, currency optional.
+  
 * v0.3 
   - Adding `unit` localiser method
   - Adding `direction` method to detect the direction of language (rtl or ltr)

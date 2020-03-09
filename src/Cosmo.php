@@ -15,7 +15,7 @@ use ResourceBundle;
 require_once "Exception.php";
 require_once "Bundle.php";
 
-class Intl extends Locale
+class Cosmo extends Locale
 {
     const NONE = IntlDateFormatter::NONE;
     const SHORT = IntlDateFormatter::SHORT;
@@ -63,7 +63,6 @@ class Intl extends Locale
     ];
 
     /**
-     * Intl constructor.
      * @param string|null $locale e.g. en_AU
      * @param array $modifiers
      */
@@ -78,7 +77,7 @@ class Intl extends Locale
         }
     }
 
-    public static function create(string $locale = null, array $modifiers = []): Intl
+    public static function create(string $locale = null, array $modifiers = []): Cosmo
     {
         return new self($locale, $modifiers);
     }
@@ -87,15 +86,15 @@ class Intl extends Locale
      * Instead of locale string you provide an array of locale subtags
      * @param array $subtags
      * @param array $modifiers
-     * @return Intl
+     * @return Cosmo
      * @see Locale::composeLocale() for the input array format
      */
-    public static function createFromSubtags(array $subtags, array $modifiers = []): Intl
+    public static function createFromSubtags(array $subtags, array $modifiers = []): Cosmo
     {
         return new self(Locale::composeLocale($subtags), $modifiers);
     }
 
-    public static function createFromHttp(?string $header = null, array $modifiers = []): Intl
+    public static function createFromHttp(?string $header = null, array $modifiers = []): Cosmo
     {
         $header = $header ?: $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? null;
         return new self(Locale::acceptFromHttp($header), $modifiers);
