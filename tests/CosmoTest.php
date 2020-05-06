@@ -113,6 +113,20 @@ class CosmoTest extends TestCase
 
         $actual = Cosmo::create('en_US')->money(12.3, 'aud');
         $this->assertEquals('A$12.30', $actual);
+
+        $actual = Cosmo::create('en_AU')->money(12.32342, 'aud');
+        $this->assertEquals('$12.32', $actual);
+        
+        $actual = Cosmo::create('en_AU')->money(12, 'aud');
+        $this->assertEquals('$12.00', $actual);
+
+        $actual = Cosmo::create('en_AU')->money(12.32342, 'aud', 0);
+        $this->assertEquals('$12', $actual);
+
+        $actual = Cosmo::create('en_AU')->money(12.62342, 'aud', 0);
+        $this->assertEquals('$13', $actual);
+
+        
     }
 
     public function testOrdinal()
