@@ -256,18 +256,29 @@ class Cosmo extends Locale
     /**
      * @param float $value
      * @param string $currency The 3-letter ISO 4217 currency code indicating the currency to use.
+     * @param int|null $precision The needed number of decimals digits 
      * @param string|null $pattern
      * @return string
      * @throws Exception
      */
-    public function money(float $value, string $currency = null, string $pattern = ''): string
+    public function money(float $value, string $currency = null, int $precision= -1,  string $pattern = ''): string
     {
         $currency = $currency ?: $this->modifiers['currency'];
         if (!$currency) {
             throw new Exception("No currency is set to format the monetary value. Set the region subtag in the local identifier (e.g. en -> en_AU) 
                                                     or provide a valid currency code parameter.");
         }
-        return (new NumberFormatter($this->locale, NumberFormatter::CURRENCY, $pattern))->formatCurrency($value, $currency);
+
+        if (!is_int($precision)) {
+            throw new Exception("Wrong precision value ($precision). Integer expected");
+        }
+
+        $fmt = new NumberFormatter( $this->locale, NumberFormatter::CURRENCY);
+        $fmt->setTextAttribute( $fmt::CURRENCY_CODE, $currency );
+        if ($precision > -1) {
+            $fmt->setAttribute($fmt::FRACTION_DIGITS, $precision);
+        }
+        return $fmt->format($value);
     }
 
     /**
