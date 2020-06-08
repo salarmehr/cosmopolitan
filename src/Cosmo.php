@@ -261,7 +261,7 @@ class Cosmo extends Locale
      * @return string
      * @throws Exception
      */
-    public function money(float $value, string $currency = null, int $precision= -1,  string $pattern = ''): string
+    public function money(float $value, string $currency = null, int $precision = null,  string $pattern = ''): string
     {
         $currency = $currency ?: $this->modifiers['currency'];
         if (!$currency) {
@@ -269,16 +269,13 @@ class Cosmo extends Locale
                                                     or provide a valid currency code parameter.");
         }
 
-        if (!is_int($precision)) {
-            throw new Exception("Wrong precision value ($precision). Integer expected");
-        }
 
-        $fmt = new NumberFormatter( $this->locale, NumberFormatter::CURRENCY);
-        $fmt->setTextAttribute( $fmt::CURRENCY_CODE, $currency );
-        if ($precision > -1) {
-            $fmt->setAttribute($fmt::FRACTION_DIGITS, $precision);
+        $formatter = new NumberFormatter( $this->locale, NumberFormatter::CURRENCY);
+        $formatter->setTextAttribute( $fmt::CURRENCY_CODE, $currency );
+        if ($precision > 0) {
+            $formatter->setAttribute($fmt::FRACTION_DIGITS, $precision);
         }
-        return $fmt->format($value);
+        return $formatter->format($value);
     }
 
     /**
