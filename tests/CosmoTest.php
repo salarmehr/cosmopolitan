@@ -106,27 +106,30 @@ class CosmoTest extends TestCase
         Cosmo::create('en_AU')->currency('foo', false, true);
     }
 
-    public function testMoney()
+    public function moneyProvider()
     {
-        $actual = Cosmo::create('en_AU')->money(12.3, 'aud');
-        $this->assertEquals('$12.30', $actual);
+        return [
+            ['$12.30', 'en_AU', 12.3, 'AUD', null],
+            ['$12.30', 'en_AU', 12.3, null, null],
+            ['$12.30', 'en_AU', 12.3, 'AUD', null],
+            ['A$12.30', 'en_US', 12.3, 'AUD', null],
+            ['$12.32', 'en_AU', 12.32342, 'AUD', null],
+            ['$12', 'en_AU', 12, 'AUD', 0],
+            ['$12', 'en_AU', 12.32342, 'AUD', 0],
+            ['$13', 'en_AU', 12.62342, 'AUD', 0],
+            ['‎ریال ۱۳', 'fa_IR', 12.62342, null, null],
+            ['‎ریال ۱۲٫۶۲', 'fa_IR', 12.62342, null, 2],
+        ];
+    }
 
-        $actual = Cosmo::create('en_US')->money(12.3, 'aud');
-        $this->assertEquals('A$12.30', $actual);
-
-        $actual = Cosmo::create('en_AU')->money(12.32342, 'aud');
-        $this->assertEquals('$12.32', $actual);
-        
-        $actual = Cosmo::create('en_AU')->money(12, 'aud');
-        $this->assertEquals('$12.00', $actual);
-
-        $actual = Cosmo::create('en_AU')->money(12.32342, 'aud', 0);
-        $this->assertEquals('$12', $actual);
-
-        $actual = Cosmo::create('en_AU')->money(12.62342, 'aud', 0);
-        $this->assertEquals('$13', $actual);
-
-        
+    /**
+     * @dataProvider moneyProvider
+     * @throws Exception
+     */
+    public function testMoney($expected, $local, $value, $currency, $precison)
+    {
+        $actual = Cosmo::create($local)->money($value, $currency, '', $precison);
+        $this->assertEquals($expected, $actual);
     }
 
     public function testOrdinal()
