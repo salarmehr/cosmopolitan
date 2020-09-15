@@ -59,7 +59,7 @@ class Cosmo extends Locale
     public $modifiers = [
         'calendar' => null, // when null, the common calendar of the locale will be used (Gregorian for most countries)
         'currency' => '',
-        'timezone' => '',
+        'timezone' => null,
     ];
 
     /**
@@ -270,7 +270,7 @@ class Cosmo extends Locale
         }
 
         $formatter = new NumberFormatter($this->locale, NumberFormatter::CURRENCY, $pattern);
-        $formatter->setTextAttribute($formatter::CURRENCY_CODE, $currency,);
+        $formatter->setTextAttribute($formatter::CURRENCY_CODE, $currency);
 
         if ($precision !== null) {
             $formatter->setAttribute($formatter::FRACTION_DIGITS, $precision);
@@ -328,7 +328,7 @@ class Cosmo extends Locale
      */
     public function customTime($value, string $format): string
     {
-        $formatter = new IntlDateFormatter($this->locale, null, null, $this->timezone, $this->calendarType, $format);
+        $formatter = new IntlDateFormatter($this->locale, null, null, $this->modifiers['timezone'], $this->calendarType, $format);
         return $formatter->format($value);
     }
 

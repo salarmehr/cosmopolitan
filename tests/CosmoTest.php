@@ -227,6 +227,11 @@ class CosmoTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function testMoment(){
+        $actual = Cosmo::create('en_US')->moment(\strtotime('2020/02/02'),'full');
+        $this->assertEquals('Sunday, February 2, 2020 at 12:00 AM', $actual);
+    }
+
     public function testMethodWithoutParameter()
     {
         $cosmo = new Cosmo('en_AU');
