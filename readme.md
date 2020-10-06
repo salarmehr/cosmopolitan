@@ -104,7 +104,7 @@ foreach ($items as $item) {
 ~~~
 
 prints
-~~~
+```
 🇦🇺 Australia - English
 ten billion one
 2nd
@@ -223,9 +223,8 @@ Language direction: rtl
 ٢‏/١‏/٢٠٢٠ ١١:٢٥ ص
 ١١:٢٥:٣٠ ص توقيت شرق أوروبا الرسمي
 الخميس، ٢ يناير ٢٠٢٠
+```
 
-
-~~~
 Licence
 =======
 MIT
@@ -240,7 +239,7 @@ Links
 Changes
 =======
 * v0.5
-  - Main class is renamed from Intl to Cosmo
+  - The main class renamed from Intl to Cosmo
   
 * v0.4
   - Addling flag method to return the emoji flag of the locale

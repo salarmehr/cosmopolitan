@@ -1,8 +1,7 @@
 <?php
-
-namespace Salarmehr\Cosmopolitan;
-
 use PHPUnit\Framework\TestCase;
+use Salarmehr\Cosmopolitan\Bundle;
+use Salarmehr\Cosmopolitan\Cosmo;
 
 require_once __DIR__ . '/../src/helper.php';
 
@@ -228,8 +227,13 @@ class CosmoTest extends TestCase
     }
 
     public function testMoment(){
-        $actual = Cosmo::create('en_US')->moment(\strtotime('2020/02/02'),'full');
+        $actual = Cosmo::create('en_US')->moment(strtotime('2020/02/02'),'full');
         $this->assertEquals('Sunday, February 2, 2020 at 12:00 AM', $actual);
+    }
+
+    public function testZaman(){
+        $actual = Cosmo::create('en_US')->customTime(strtotime('2020/02/02'),'YYYY');
+        $this->assertEquals('2020', $actual);
     }
 
     public function testMethodWithoutParameter()
