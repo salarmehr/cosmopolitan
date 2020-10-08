@@ -11,14 +11,13 @@ Features
 ---------
 Cosmopolitan supports localisation of
 
-- Currency name and Symbol
-- Monetary ary values
-- Time (from milliseconds to era)
+- Currency name and symbol
+- Monetary values
+- Time (milliseconds to era)
 - Numbers
 - Percentage
 - Ordinal numbers
 - Quoting text
-- Translating the name of languages and countries
 - Spelling out of numbers
 - Duration
 - Units (SI and U.S.)
