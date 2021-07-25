@@ -120,7 +120,12 @@ class Cosmo extends Locale
     {
         $current = Bundle::create($local, $bundleName, true);
         foreach ($path as $item) {
-            $current = @$current[$item] ?? null;
+            try {
+                $current = $current->get($item);
+            }
+            catch (\Exception $exception){
+                return null;
+            }
             if (!is_object($current)) {
                 return $current;
             }
@@ -157,7 +162,7 @@ class Cosmo extends Locale
      * Translate a language identifier (e.g. En -> English, glk -> Gilaki)
      * If you have a locale identifier (en-Au) instead of language
      * use \Locale::getPrimaryLanguage($locale) to extract the language
-     * @param $language
+     * @param ?string $language
      * @return string
      */
     public function language(?string $language = null): string
@@ -221,7 +226,7 @@ class Cosmo extends Locale
     /**
      * Translate the script identifier (e.g. 'zh_Hans' -> 'Simplified Chinese')
      * If no parameter is send and the scrip subtag is presented on the locale identifier, it will be used as the input
-     * @param $script
+     * @param ?string $script
      * @return string
      */
     public function script(?string $script = null): string
@@ -303,6 +308,24 @@ class Cosmo extends Locale
     {
         return (new NumberFormatter($this->locale, NumberFormatter::ORDINAL))->format($number);
     }
+
+    /**
+     * Get a symbol value
+     * @link https://php.net/manual/en/numberformatter.getsymbol.php
+     * @param int|string $symbol <p>
+     * Symbol specifier, one of the format symbol constants.
+     * </p>
+     * @return string|false The symbol string or <b>FALSE</b> on error.
+     */
+    public function symbol($symbol): string
+    {
+        if(is_string($symbol)){
+            $symbol = strtoupper($symbol);
+            $symbol= constant("NumberFormatter::{$symbol}_SYMBOL");
+        }
+        return (new NumberFormatter($this->locale, NumberFormatter::DECIMAL))->getSymbol($symbol);
+    }
+
 
     public function spellout(float $number): string
     {

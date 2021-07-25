@@ -4,13 +4,15 @@
  */
 
 /*
- * This helper is not loaded by default. If you want to use it add the following to "files" section of your composer.json
- * or use require_one to load it.
+ * This helper is not loaded by default. If you want to use it add the following
+ * to the "files" section of your composer.json or use require_one to load it.
  */
 
-if (!function_exists('intl')) {
-    function cosmo(string $locale = null, array $modifiers = []): \Salarmehr\Cosmopolitan\Cosmo
+use Salarmehr\Cosmopolitan\Cosmo;
+
+if (!function_exists('cosmo')) {
+    function cosmo(string $locale = null, array $modifiers = []): Cosmo
     {
-        return new \Salarmehr\Cosmopolitan\Cosmo($locale, $modifiers);
+        return new Cosmo($locale, $modifiers);
     }
 }

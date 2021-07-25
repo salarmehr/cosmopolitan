@@ -1,5 +1,11 @@
-Cosmopolitan 
-============
+```
+   ______                                       ___ __            
+  / ____/___  _________ ___  ____  ____  ____  / (_) /_____ _____ 
+ / /   / __ \/ ___/ __ `__ \/ __ \/ __ \/ __ \/ / / __/ __ `/ __ \
+/ /___/ /_/ (__  ) / / / / / /_/ / /_/ / /_/ / / / /_/ /_/ / / / /
+\____/\____/____/_/ /_/ /_/\____/ .___/\____/_/_/\__/\__,_/_/ /_/ 
+                               /_/                                
+```
 Cosmopolitan is the ultimate tool to localise your PHP application.
 Just set the locale (language-country) and timezone, and your
 application would be localised for your audience.
@@ -9,22 +15,20 @@ application would be localised for your audience.
 
 Features
 ---------
-Cosmopolitan supports localisation of
-
-- Currency name and Symbol
-- Monetary ary values
-- Time (from milliseconds to era)
-- Numbers
-- Percentage
-- Ordinal numbers
-- Quoting text
-- Translating the name of languages and countries
-- Spelling out of numbers
-- Duration
-- Units (SI and U.S.)
-- Translation of countries name, languages, scripts, calendars, etc.
-- [ICU Messages](http://userguide.icu-project.org/formatparse/messages) (pluralisation, word gender selection, ...)
-- ...
+* Translation of countries name, languages, scripts, calendars, etc.
+* [ICU Messages](http://userguide.icu-project.org/formatparse/messages) (pluralisation, word gender selection, ...)
+* Spelling out of numbers
+* Localisation of
+  - Monetary values
+  - Time (milliseconds to era)
+  - Numbers
+  - Currency name and symbol
+  - Percentage
+  - Ordinal numbers
+  - Quoting text
+  - Duration
+  - Units (SI and U.S.)
+  - ...
 
 Installation
 ============
@@ -38,7 +42,7 @@ Set the Locale identifier (langauge_COUNTRY) and you are ready to go
 use Salarmehr\Cosmopolitan\Cosmo;
 echo Cosmo::create('en')->spellout(5000000); // five million - English
 echo Cosmo::create('es_ES')->money(11000.4); // 11.000,40 € - Spanish (Spain)
-echo Cosmo::create('tu')->unit('temperature','celsius',26); // 26°C - Turkish
+echo Cosmo::create('tu')->unit('temperature','celsius', 26); // 26°C - Turkish
 ~~~
 Or you can use the helper function (it is not loaded by default). 
 e.g. `echo cosmo('en')->spellout(120)` prints "one hundred twenty". 
@@ -236,22 +240,22 @@ Links
 - [ICU data tables by Alexander Makarov](https://intl.rmcreative.ru/)
 - [Online ICU Message Editor](https://format-message.github.io/icu-message-format-for-translators/)
 
-Changes
+Changelog
 =======
+* v1.1
+  - Added `symbol()` method eg. `(new Cosmo('en'))->symbol('permill');` returns `‰`
 * v0.5
-  - The main class renamed from Intl to Cosmo
-  
+  - Changed The main class name from Intl to Cosmo
 * v0.4
-  - Addling flag method to return the emoji flag of the locale
-  - Making the input of country, language, direction, currency optional.
-  
+  - Added flag method to return the emoji flag of the locale
+  - Changed the input of country, language, direction, currency optional.
 * v0.3 
-  - Adding `unit` localiser method
-  - Adding `direction` method to detect the direction of language (rtl or ltr)
-  - Adding createFromHttp()
-  - Adding createFromSubtags
-  - Detecting a default currency code from locale identifier
-  - Dividing options param to subtags and modifiers 
+  - Added `unit` localiser method
+  - Added `direction` method to detect the direction of language (rtl or ltr)
+  - Added createFromHttp()
+  - Added createFromSubtags
+  - Added detecting a default currency code from locale identifier
+  - Changed options param to subtags and modifiers 
 
 How to collaborate?
 =================

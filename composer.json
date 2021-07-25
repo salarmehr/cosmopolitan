@@ -1,7 +1,7 @@
 {
   "name": "salarmehr/cosmopolitan",
   "description": "Super efficient application localisation",
-  "type": "Utility",
+  "type": "internationalisation",
   "license": "MIT",
   "authors": [
     {

@@ -131,6 +131,42 @@ class CosmoTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function symbolProvider()
+    {
+        return [
+            ['fa', NumberFormatter::DECIMAL_SEPARATOR_SYMBOL, '٫'],
+            ['fa', NumberFormatter::DIGIT_SYMBOL, '#'],
+            ['fa', 'decimal_separator', '٫'],
+            ['fa', 'grouping_separator', '٬'],
+            ['fa', 'pattern_separator', ';'],
+            ['fa', 'percent', '٪'],
+            ['fa', 'zero_digit', '۰'],
+            ['fa', 'digit', '#'],
+            ['fa', 'minus_sign', '‎−'],
+            ['fa', 'plus_sign', '‎+'],
+            ['fa', 'currency', '¤'],
+            ['fa', 'intl_currency', '¤¤'],
+            ['fa', 'monetary_separator', '٫'],
+            ['fa', 'exponential', '×۱۰^'],
+            ['fa', 'permill', '؉'],
+            ['fa', 'pad_escape', '*'],
+            ['fa', 'infinity', '∞'],
+            ['fa', 'nan', 'ناعدد'],
+            ['fa', 'significant_digit', '@'],
+            ['fa', 'monetary_grouping_separator', '٬'],
+        ];
+    }
+
+    /**
+     * @dataProvider symbolProvider
+     * @throws Exception
+     */
+    public function testSymbol($local, $symbolName, $expected)
+    {
+        $actual = Cosmo::create($local)->symbol($symbolName);
+        $this->assertEquals($expected, $actual);
+    }
+
     public function testOrdinal()
     {
         $actual = Cosmo::create('en_AU')->ordinal(1);
