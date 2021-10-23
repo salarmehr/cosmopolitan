@@ -7,8 +7,8 @@
                                /_/                                
 ```
 Cosmopolitan is the ultimate tool to localise your PHP application.
-Just set the locale (language-country) and timezone, and your
-application would be localised for your audience.
+Just set the locale (`language-country`) and timezone, and your
+application is localised for your audience.
 
 - Cosmopolitan is based on intl PHP extension and super-efficient
 - Internationalisation for all countries, languages, scripts, calendars, and timezones
@@ -61,7 +61,7 @@ $items = [
     ['en_AU', 'Australia/Sydney'],
     ['en_GB', 'Europe/London'],
     ['de_DE', 'Europe/Berlin'],
-    ['zh_CH', 'Asia/Chongqing'],
+    ['zh_CN', 'Asia/Chongqing'],
     ['fa_IR', 'Asia/Tehran'],
     ['hi_IN', 'Asia/Jayapura'],
     ['ar_EG', 'Africa/Cairo'],
@@ -107,7 +107,8 @@ foreach ($items as $item) {
 }
 ~~~
 
-prints
+Output:
+
 ```
 🇦🇺 Australia - English
 ten billion one
@@ -122,8 +123,8 @@ Language direction: ltr
 2.19 gigabytes
 2.19 GB
 120 grams
-2/1/20, 8:25 pm
-8:25:30 pm Australian Eastern Daylight Time
+2/1/20, 9:25 am
+9:25:30 am Australian Eastern Daylight Time
 Thursday, 2 January 2020
 
 🇬🇧 United Kingdom - English
@@ -139,9 +140,9 @@ Language direction: ltr
 2.19 gigabytes
 2.19 GB
 120 grams
-02/01/2020, 09:25
-09:25:30 Greenwich Mean Time
-Thursday, 2 January 2020
+01/01/2020, 22:25
+22:25:30 Greenwich Mean Time
+Wednesday, 1 January 2020
 
 🇩🇪 Deutschland - Deutsch
 zehn Milliarden eins
@@ -153,12 +154,12 @@ zehn Milliarden eins
 12,30 €
 Euro
 Language direction: ltr
-2,19 Gigabytes
+2,19 Gigabyte
 2,19 GB
 120 Gramm
-02.01.20, 10:25
-10:25:30 Mitteleuropäische Normalzeit
-Donnerstag, 2. Januar 2020
+01.01.20, 23:25
+23:25:30 Mitteleuropäische Normalzeit
+Mittwoch, 1. Januar 2020
 
 🇨🇭 瑞士 - 中文
 一百亿〇一
@@ -171,10 +172,10 @@ CHF 12.30
 瑞士法郎
 Language direction: ltr
 2.19吉字节
-2.19吉字节
+2.19 GB
 120克
-2020/1/2 下午5:25
-中国标准时间 下午5:25:30
+2020/1/2 06:25
+中国标准时间 06:25:30
 2020年1月2日星期四
 
 🇮🇷 ایران - فارسی
@@ -188,10 +189,10 @@ Language direction: ltr
 ریال ایران
 Language direction: rtl
 ۲٫۱۹ گیگابایت
-۲٫۱۹ گیگابایت
+۲٫۱۹ <LRM>GB
 ۱۲۰ گرم
-۱۳۹۸/۱۰/۱۲،‏ ۱۲:۵۵
-۱۲:۵۵:۳۰ (وقت عادی ایران)
+۱۳۹۸/۱۰/۱۲،‏ ۱:۵۵
+۱:۵۵:۳۰ (وقت عادی ایران)
 ۱۳۹۸ دی ۱۲, پنجشنبه
 
 🇮🇳 भारत - हिन्दी
@@ -207,8 +208,8 @@ Language direction: ltr
 2.19 गीगाबाइट
 2.19 GB
 120 ग्राम
-2/1/20, 6:25 pm
-6:25:30 pm पूर्वी इंडोनेशिया समय
+2/1/20, 7:25 am
+7:25:30 am पूर्वी इंडोनेशिया समय
 गुरुवार, 2 जनवरी 2020
 
 🇪🇬 مصر - العربية
@@ -224,9 +225,10 @@ Language direction: rtl
 ٢٫١٩ غيغابايت
 ٢٫١٩ غيغابايت
 ١٢٠ غرامًا
-٢‏/١‏/٢٠٢٠ ١١:٢٥ ص
-١١:٢٥:٣٠ ص توقيت شرق أوروبا الرسمي
+٢‏/١‏/٢٠٢٠, ١٢:٢٥ ص
+١٢:٢٥:٣٠ ص توقيت شرق أوروبا الرسمي
 الخميس، ٢ يناير ٢٠٢٠
+
 ```
 
 Licence
@@ -235,10 +237,11 @@ MIT
 
 Links
 =====
-- [Locale Explorer](http://demo.icu-project.org/icu-bin/locexp)
+- [ICU Documentation](https://unicode-org.github.io/icu/)
 - [ICU Data](https://github.com/unicode-org/icu/tree/release-65-1/icu4c/source/data)
-- [ICU data tables by Alexander Makarov](https://intl.rmcreative.ru/)
 - [Online ICU Message Editor](https://format-message.github.io/icu-message-format-for-translators/)
+- [ICU data tables by Alexander Makarov](https://intl.rmcreative.ru/)
+- [The Locale Explorer by Joseph M. Newcomer](http://www.flounder.com/localeexplorer.htm)
 
 Changelog
 =======

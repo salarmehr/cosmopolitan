@@ -8,7 +8,7 @@ $items = [
     ['en_AU', 'Australia/Sydney'],
     ['en_GB', 'Europe/London'],
     ['de_DE', 'Europe/Berlin'],
-    ['zh_CH', 'Asia/Chongqing'],
+    ['zh_CN', 'Asia/Chongqing'],
     ['fa_IR', 'Asia/Tehran'],
     ['hi_IN', 'Asia/Jayapura'],
     ['ar_EG', 'Africa/Cairo'],
