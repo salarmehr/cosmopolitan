@@ -28,7 +28,7 @@ class CosmoTest extends TestCase
 
     public function testHelper()
     {
-        $actual = cosmo('tu')->unit('temperature', 'celsius', 26);
+        $actual = cosmo('tu')->unit('temperature', 'celsius', 26, 'short');
         $this->assertEquals('26°C', $actual);
     }
 

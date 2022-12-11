@@ -421,10 +421,10 @@ class Cosmo extends Locale
      * @return string
      * @throws Exception
      */
-    public function unit($unit, $scale, $value, $type = 'full'): string
+    public function unit($unit, $scale, $value, string $type = 'full'): string
     {
         if (!array_key_exists($type, self::UNITE_TYPES)) {
-            throw new Exception("$type is not a valid type for unit formatting");
+            throw new Exception("$type is not a valid type for unit formatting.");
         }
 
         $bundle = $this->get('ICUDATA-unit', self::UNITE_TYPES[$type], $unit, $scale);
