@@ -436,6 +436,9 @@ class Cosmo extends Locale
     {
         $categories = '';
         foreach ($bundle as $category => $string) {
+            if (!is_string($string)) {
+                continue;
+            }
             $categories .= "$category {{$string}}";
         }
         $categories = str_replace('{0}', '#', $categories);
