@@ -17,7 +17,7 @@ class Bundle extends \ResourceBundle
     /**
      * @inheritDoc
      */
-    public function get($index, $fallback = null):mixed
+    public function get($index, $fallback = null)
     {
         $output = parent::get($index);
         if (intl_is_failure(self::getErrorCode())) {
