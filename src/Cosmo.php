@@ -206,7 +206,7 @@ class Cosmo extends Locale
     }
 
     /**
-     * Returns the emoji of a locale (e.g. AU -> Australia)
+     * Returns the emoji of a locale (e.g. AU -> 🇦🇺)
      * @param ?string $country ISO 3166 country codes or a valid locale
      * @return string
      */

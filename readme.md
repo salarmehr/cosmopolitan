@@ -37,7 +37,7 @@ Make sure the `php-intl` extension is installed and enabled by checking both `ph
 composer require salarmehr/cosmopolitan
 ~~~ 
 
-Set the Locale identifier (langauge_COUNTRY) and you are ready to go
+then set the Locale identifier (langauge_COUNTRY) and you are ready to go
 ~~~php
 use Salarmehr\Cosmopolitan\Cosmo;
 echo Cosmo::create('en')->spellout(5000000); // five million - English
@@ -242,25 +242,3 @@ Links
 - [Online ICU Message Editor](https://format-message.github.io/icu-message-format-for-translators/)
 - [ICU data tables by Alexander Makarov](https://intl.rmcreative.ru/)
 - [The Locale Explorer by Joseph M. Newcomer](http://www.flounder.com/localeexplorer.htm)
-
-Changelog
-=======
-* v1.1
-  - Added `symbol()` method eg. `(new Cosmo('en'))->symbol('permill');` returns `‰`
-* v0.5
-  - Changed The main class name from Intl to Cosmo
-* v0.4
-  - Added flag method to return the emoji flag of the locale
-  - Changed the input of country, language, direction, currency optional.
-* v0.3 
-  - Added `unit` localiser method
-  - Added `direction` method to detect the direction of language (rtl or ltr)
-  - Added createFromHttp()
-  - Added createFromSubtags
-  - Added detecting a default currency code from locale identifier
-  - Changed options param to subtags and modifiers 
-
-How to collaborate?
-=================
- Help by creating PR or in any way you can ☺ 
-
