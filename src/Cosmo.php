@@ -1,6 +1,6 @@
 <?php
 /**
- * Created by Reza Salarmehr.
+ * Created by Aiden Adrian
  */
 declare(strict_types=1);
 
@@ -67,7 +67,7 @@ class Cosmo extends Locale
 
     /**
      * @param string|null $locale e.g. en_AU
-     * @param array       $modifiers
+     * @param array $modifiers
      */
     public function __construct(string $locale = null, array $modifiers = [])
     {
@@ -106,7 +106,7 @@ class Cosmo extends Locale
 
     /**
      * @param string $bundleName
-     * @param array  $path
+     * @param array $path
      * @return ResourceBundle|string
      */
     public function get(string $bundleName, ...$path)
@@ -122,8 +122,7 @@ class Cosmo extends Locale
         foreach ($path as $item) {
             try {
                 $current = $current->get($item);
-            }
-            catch (\Exception $exception){
+            } catch (\Exception $exception) {
                 return null;
             }
             if (!is_object($current)) {
@@ -137,8 +136,8 @@ class Cosmo extends Locale
 
     /**
      * @param ?string $currencyCode The 3-letter ISO 4217 currency code indicating the currency to use.
-     * @param bool   $getSymbol
-     * @param bool   $strict
+     * @param bool $getSymbol
+     * @param bool $strict
      * @return string
      * @throws Exception
      */
@@ -160,7 +159,7 @@ class Cosmo extends Locale
 
     /**
      * Translate a language identifier (e.g. En -> English, glk -> Gilaki)
-     * If you have a locale identifier (en-Au) instead of language
+     * If you have a locale identifier (en-Au) instead of a language
      * use \Locale::getPrimaryLanguage($locale) to extract the language
      * @param ?string $language
      * @return string
@@ -180,8 +179,7 @@ class Cosmo extends Locale
         try {
             $dir = Bundle::create($language, Bundle::LOCALE, true)['layout']['characters'] ?? null;
             return $dir == 'right-to-left' ? 'rtl' : 'ltr';
-        }
-        catch (\Exception $exception) {
+        } catch (\Exception $exception) {
             return 'ltr';
         }
     }
@@ -218,6 +216,10 @@ class Cosmo extends Locale
 
         $country = strtoupper($country);
 
+        if (!$country) {
+            return '';
+        }
+
         // 127397 is flag offset (0x1F1E6) mines ascii offset (0x41)
         return IntlChar::chr(ord($country[0]) + 127397)
             . IntlChar::chr(ord($country[1]) + 127397);
@@ -225,7 +227,7 @@ class Cosmo extends Locale
 
     /**
      * Translate the script identifier (e.g. 'zh_Hans' -> 'Simplified Chinese')
-     * If no parameter is send and the scrip subtag is presented on the locale identifier, it will be used as the input
+     * If no parameter is sent and the scrip subtag is presented on the locale identifier, it will be used as the input
      * @param ?string $script
      * @return string
      */
@@ -262,20 +264,20 @@ class Cosmo extends Locale
     }
 
     /**
-     * @param float   $value
-     * @param ?string $currency  The 3-letter ISO 4217 currency code indicating the currency to use.
-     * @param ?int    $precision The needed number of decimals digits
-     * @param string  $pattern
+     * @param float $value
+     * @param ?string $currency The 3-letter ISO 4217 currency code indicates the currency to use.
+     * @param ?int $precision The needed number of decimals digits
+     * @param string $pattern
      * @return string
      * @throws Exception
      */
     public function money(float $value, ?string $currency = null, string $pattern = '', ?int $precision = null): string
     {
         $currency = $currency ?: $this->modifiers['currency'];
-        if (!$currency) {
-            throw new Exception("No currency is set to format the monetary value. 
-                        Set the region subtag in the local identifier (e.g. en -> en_AU) or provide a valid currency code parameter.");
-        }
+//        if (!$currency) {
+//            throw new Exception("No currency is set to format the monetary value.
+//                        Set the region subtag in the local identifier (e.g. en -> en_AU) or provide a valid currency code parameter.");
+//        }
 
         $formatter = new NumberFormatter($this->locale, NumberFormatter::CURRENCY, $pattern);
         $formatter->setTextAttribute($formatter::CURRENCY_CODE, $currency);
@@ -289,7 +291,7 @@ class Cosmo extends Locale
 
     /**
      * @param float $value
-     * @param int   $precision
+     * @param int $precision
      * @return string
      */
     public function percentage(float $value, int $precision = 3): string
@@ -315,13 +317,13 @@ class Cosmo extends Locale
      * @param int|string $symbol <p>
      * Symbol specifier, one of the format symbol constants.
      * </p>
-     * @return string|false The symbol string or <b>FALSE</b> on error.
+     * @return string The symbol string or <b>FALSE</b> on error.
      */
-    public function symbol($symbol): string
+    public function symbol(int|string $symbol): string
     {
-        if(is_string($symbol)){
+        if (is_string($symbol)) {
             $symbol = strtoupper($symbol);
-            $symbol= constant("NumberFormatter::{$symbol}_SYMBOL");
+            $symbol = constant("NumberFormatter::{$symbol}_SYMBOL");
         }
         return (new NumberFormatter($this->locale, NumberFormatter::DECIMAL))->getSymbol($symbol);
     }
@@ -334,7 +336,7 @@ class Cosmo extends Locale
 
     /**
      * @param float $duration
-     * @param bool  $withWords this currently works for English, for other languages it has no effect on output
+     * @param bool $withWords this currently works for English, for other languages it has no effect on the output
      * @return string
      */
     public function duration(float $duration, bool $withWords = false): string
@@ -356,22 +358,22 @@ class Cosmo extends Locale
 
     /**
      * Localise time, date, or date+time. Allowed types are none, short, medium, long and full.
-     * @param mixed   $value        Value to format. This may be
+     * @param mixed $value Value to format. This may be
      *                              a DateTimeInterface object,
      *                              an IntlCalendar object,
      *                              a numeric type representing a (possibly fractional) number of seconds since epoch
      *                              or an array in the format output by localtime().
-     *                              If a DateTime or an IntlCalendar object is passed, its timezone is not considered. The object will be formatted using the formaterʼs configured timezone. If one wants to use the timezone of the object to be formatted, IntlDateFormatter::setTimeZone() must be called before with the objectʼs timezone. Alternatively, the static function IntlDateFormatter::formatObject() may be used instead.
-     * @param string  $dateType
-     * @param string  $timeType
-     * @param ?string $calendar     currently only this two values are supported.
-     *                              null: uses the common calendar of the local e.g. Persian Calendar for Iran, and Gregorian Australia
+     *                              If a DateTime or an IntlCalendar object is passed, its timezone is not considered. The object will be formatted using the formaterʼs configured timezone. If one wants to use the timezone of the object to be formatted, IntlDateFormatter::setTimeZone() must be called before the object's timezone. Alternatively, the static function IntlDateFormatter::formatObject() may be used instead.
+     * @param string $dateType
+     * @param string $timeType
+     * @param ?string $calendar The default is to use the official Calendar of the country (e.g. Persian Calendar for Iran, and Gregorian for Australia)
+     *                              to force "gregorian" calendar for all countries set this argument as "gregorian".
      *                              'gregorian': will use this calendar to display temporal values
      * @param ?string $pattern
      * @return string
      * @throws Exception
      */
-    public function moment($value, string $dateType = 'short', string $timeType = 'short', ?string $calendar = null, ?string $pattern = null): string
+    public function moment(mixed $value, string $dateType = 'short', string $timeType = 'short', ?string $calendar = null, ?string $pattern = null): string
     {
         $calendar = $calendar ?: $this->modifiers['calendar'] == null;
 
@@ -389,12 +391,21 @@ class Cosmo extends Locale
     }
 
     /**
-     * Use this function to have a formatted data time or get the individual time components (zaman means time)
-     * @param mixed       $value
-     * @param string      $pattern see https://unicode-org.github.io/icu-docs/apidoc/released/icu4c/classSimpleDateFormat.html#details
-     * @param string|null $calendar
-     * @return false|string
+     * Format the moment (date/time) value as a string
+     * @param mixed $value
+     * @param string $pattern see https://unicode-org.github.io/icu-docs/apidoc/released/icu4c/classSimpleDateFormat.html#details
+     * @param string|null $calendar IntlDateFormatter::GREGORIAN or IntlDateFormatter::TRADITIONAL
+     * @return string
      * @throws Exception
+     */
+    public function formatMoment(mixed $value, string $pattern, ?string $calendar = null): string
+    {
+        return $this->moment($value, 'none', 'none', $calendar, $pattern);
+    }
+
+    /**
+     * @throws Exception
+     * @deprecated  use momentFormatter()
      */
     public function customTime($value, string $pattern, ?string $calendar = null): string
     {
@@ -412,14 +423,15 @@ class Cosmo extends Locale
     }
 
     /**
-     * Localise nearly all units and scale see https://intl.rmcreative.ru/site/unit-data?locale=en for the list of possible units and scales
-     * This method is in experimental stage
+     * This method is experimental
+     * Localise units and scales.
      * @param        $unit
      * @param        $scale
      * @param        $value
      * @param string $type
      * @return string
      * @throws Exception
+     * @see https://intl.rmcreative.ru/site/unit-data?locale=en for the list of possible units and scales
      */
     public function unit($unit, $scale, $value, string $type = 'full'): string
     {

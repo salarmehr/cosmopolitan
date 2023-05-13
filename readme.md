@@ -1,11 +1,15 @@
 ```
    ______                                       ___ __            
-  / ____/___  _________ ___  ____  ____  ____  / (_) /_____ _____ 
+  / ____/___  _________ ___  ____  ____  ____  / (_) /_____ _____
  / /   / __ \/ ___/ __ `__ \/ __ \/ __ \/ __ \/ / / __/ __ `/ __ \
 / /___/ /_/ (__  ) / / / / / /_/ / /_/ / /_/ / / / /_/ /_/ / / / /
-\____/\____/____/_/ /_/ /_/\____/ .___/\____/_/_/\__/\__,_/_/ /_/ 
+\____/\____/____/_/ /_/ /_/\____/ .___/\____/_/_/\__/\__,_/_/ /_/
                                /_/                                
 ```
+It does not matter if you are developing a console app for personal use or a web application in 30 languages.
+As far as you display some data you will need to represent your data in the format your users will understand.
+Don't worry! Cosmopolitan is here to help!
+
 Cosmopolitan is the ultimate tool to localise your PHP application.
 Just set the locale (`language-country`) and timezone, and your
 application is localised for your audience.
@@ -15,12 +19,12 @@ application is localised for your audience.
 
 Features
 ---------
-* Translation of countries name, languages, scripts, calendars, etc.
+* Translation of country codes, language codes, script codes, calendars codes, etc.
 * [ICU Messages](http://userguide.icu-project.org/formatparse/messages) (pluralisation, word gender selection, ...)
-* Spelling out of numbers
+* Spelling out numbers
 * Localisation of
   - Monetary values
-  - Time (milliseconds to era)
+  - Time (milliseconds to the era)
   - Numbers
   - Currency name and symbol
   - Percentage
@@ -34,18 +38,18 @@ Installation
 ============
 Make sure the `php-intl` extension is installed and enabled by checking both `phpinfo()` page and  `php -m` command and run
 ~~~    
-composer require salarmehr/cosmopolitan
-~~~ 
+composer requires salarmehr/cosmopolitan
+~~~
 
 then set the Locale identifier (langauge_COUNTRY) and you are ready to go
 ~~~php
 use Salarmehr\Cosmopolitan\Cosmo;
 echo Cosmo::create('en')->spellout(5000000); // five million - English
-echo Cosmo::create('es_ES')->money(11000.4); // 11.000,40 € - Spanish (Spain)
+echo Cosmo::create('es_ES')->money(11000.4); // 11.000,40 € - Spanish (Spain)
 echo Cosmo::create('tu')->unit('temperature','celsius', 26); // 26°C - Turkish
 ~~~
-Or you can use the helper function (it is not loaded by default). 
-e.g. `echo cosmo('en')->spellout(120)` prints "one hundred twenty". 
+Or you can use the helper function (it is not loaded by default).
+e.g. `echo cosmo('en')->spellout(120)` prints "one hundred twenty".
 
 Example
 --------
@@ -86,7 +90,7 @@ foreach ($items as $item) {
     echo $cosmo->duration(599) . "\n";
     // ِ The currency code can be passed as the second argument or passed as an item of the modifiers array
     // otherwise the currency of the region will be used
-    // make sure you have exchanged the currencies if necessary before using this function.
+    // Make sure you have exchanged the currencies if necessary before using this function.
     echo $cosmo->money(12.3) . "\n";
     echo $cosmo->currency($cosmo->modifiers['currency']) . "\n";
     echo "Language direction: " . $cosmo->direction() . "\n";
@@ -110,16 +114,16 @@ foreach ($items as $item) {
 Output:
 
 ```
-🇦🇺 Australia - English
+🇦🇺 Australia - English (en_AU)
+=================================================
+Language direction: ltr
 ten billion one
 2nd
 “Quoted text!”
 123,400.567
 14%
-9:59
 $12.30
 Australian Dollar
-Language direction: ltr
 2.19 gigabytes
 2.19 GB
 120 grams
@@ -127,84 +131,101 @@ Language direction: ltr
 9:25:30 am Australian Eastern Daylight Time
 Thursday, 2 January 2020
 
-🇬🇧 United Kingdom - English
+🇺🇰 United Kingdom - English (en_UK)
+=================================================
+Language direction: ltr
 ten billion one
 2nd
 “Quoted text!”
 123,400.567
 14%
-9:59
-£12.30
-British Pound
-Language direction: ltr
+¤12.30
+Unknown Currency
 2.19 gigabytes
 2.19 GB
 120 grams
-01/01/2020, 22:25
-22:25:30 Greenwich Mean Time
-Wednesday, 1 January 2020
+1/1/20, 10:25 PM
+10:25:30 PM Greenwich Mean Time
+Wednesday, January 1, 2020
 
-🇩🇪 Deutschland - Deutsch
+🇩🇪 Deutschland - Deutsch (de_DE)
+=================================================
+Language direction: ltr
 zehn Milliarden eins
 2.
 „Quoted text!“
 123.400,567
 14 %
-599
 12,30 €
 Euro
-Language direction: ltr
-2,19 Gigabyte
+2,19 Gigabytes
 2,19 GB
 120 Gramm
 01.01.20, 23:25
 23:25:30 Mitteleuropäische Normalzeit
 Mittwoch, 1. Januar 2020
 
-🇨🇭 瑞士 - 中文
+🇨🇳 中国 - 中文 (zh_CN)
+=================================================
+Language direction: ltr
 一百亿〇一
 第2
 “Quoted text!”
 123,400.567
 14%
-599
-CHF 12.30
-瑞士法郎
-Language direction: ltr
+¥12.30
+人民币
 2.19吉字节
-2.19 GB
+2.19吉字节
 120克
-2020/1/2 06:25
-中国标准时间 06:25:30
+2020/1/2 上午6:25
+中国标准时间 上午6:25:30
 2020年1月2日星期四
 
-🇮🇷 ایران - فارسی
+🇮🇷 ایران - فارسی (fa-IR)
+=================================================
+Language direction: rtl
 ده میلیارد و یک
 ۲.
 «Quoted text!»
 ۱۲۳٬۴۰۰٫۵۶۷
 ۱۴٪
-۵۹۹
 ‎ریال ۱۲
 ریال ایران
-Language direction: rtl
 ۲٫۱۹ گیگابایت
-۲٫۱۹ <LRM>GB
+۲٫۱۹ گیگابایت
 ۱۲۰ گرم
 ۱۳۹۸/۱۰/۱۲،‏ ۱:۵۵
 ۱:۵۵:۳۰ (وقت عادی ایران)
 ۱۳۹۸ دی ۱۲, پنجشنبه
 
-🇮🇳 भारत - हिन्दी
+🇮🇷 ایران - فارسی (fa-IR-u-nu-latn-ca-buddhist)
+=================================================
+Language direction: rtl
+ده میلیارد و یک
+2.
+«Quoted text!»
+123,400.567
+14%
+‎ریال 12
+ریال ایران
+2.19 گیگابایت
+2.19 گیگابایت
+120 گرم
+2563/1/2 تقویم بودایی،‏ 1:55
+1:55:30 (وقت عادی ایران)
+پنجشنبه 2 ژانویهٔ 2563 تقویم بودایی
+
+🇮🇳 भारत - हिन्दी (hi_IN)
+=================================================
+Language direction: ltr
 दस अरब एक
 2रा
 “Quoted text!”
 1,23,400.567
 14%
-599
 ₹12.30
 भारतीय रुपया
-Language direction: ltr
 2.19 गीगाबाइट
 2.19 GB
 120 ग्राम
@@ -212,25 +233,23 @@ Language direction: ltr
 7:25:30 am पूर्वी इंडोनेशिया समय
 गुरुवार, 2 जनवरी 2020
 
-🇪🇬 مصر - العربية
+🇪🇬 مصر - العربية (ar_EG)
+=================================================
+Language direction: rtl
 عشرة مليار و واحد
 ٢.
 ”Quoted text!“
 ١٢٣٬٤٠٠٫٥٦٧
 ١٤٪؜
-٥٩٩
 ١٢٫٣٠ ج.م.‏
 جنيه مصري
-Language direction: rtl
 ٢٫١٩ غيغابايت
 ٢٫١٩ غيغابايت
 ١٢٠ غرامًا
-٢‏/١‏/٢٠٢٠, ١٢:٢٥ ص
+٢‏/١‏/٢٠٢٠ ١٢:٢٥ ص
 ١٢:٢٥:٣٠ ص توقيت شرق أوروبا الرسمي
 الخميس، ٢ يناير ٢٠٢٠
-
 ```
-
 Licence
 =======
 MIT
