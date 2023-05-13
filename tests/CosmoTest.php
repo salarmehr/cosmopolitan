@@ -268,7 +268,7 @@ class CosmoTest extends TestCase
     }
 
     public function testZaman(){
-        $actual = Cosmo::create('en_US')->customTime(strtotime('2020/02/02'),'YYYY');
+        $actual = Cosmo::create('en_US')->formatMoment(strtotime('2020/02/02'),'YYYY');
         $this->assertEquals('2020', $actual);
     }
 
