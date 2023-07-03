@@ -38,7 +38,7 @@ Installation
 ============
 Make sure the `php-intl` extension is installed and enabled by checking both `phpinfo()` page and  `php -m` command and run
 ~~~    
-composer requires salarmehr/cosmopolitan
+composer require salarmehr/cosmopolitan
 ~~~
 
 then set the Locale identifier (langauge_COUNTRY) and you are ready to go
