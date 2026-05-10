@@ -6,33 +6,37 @@ declare(strict_types=1);
 
 namespace Salarmehr\Cosmopolitan;
 
+use ReturnTypeWillChange;
+
 class Bundle extends \ResourceBundle
 {
 
-    const BRKITR = 'ICUDATA-brkitr'; // Break Iterator Rule Source Data
-    const CURRENCY = 'ICUDATA-curr';
-    const LOCALE = 'ICUDATA';
-    const LANGUAGE = 'ICUDATA-lang';
+    const string BRKITR = 'ICUDATA-brkitr'; // Break Iterator Rule Source Data
+    const string CURRENCY = 'ICUDATA-curr';
+    const string LOCALE = 'ICUDATA';
+    const string LANGUAGE = 'ICUDATA-lang';
 
     /**
      * @inheritDoc
+     * @throws Exception
      */
+    #[ReturnTypeWillChange] #[\Override]
     public function get($index, $fallback = null): mixed
     {
         $output = parent::get($index);
         if (intl_is_failure(self::getErrorCode())) {
-            throw new Exception(self::getErrorMessage());
+            throw new Exception(self::getErrorMessage(), self::getErrorCode());
         }
         return $output;
     }
 
     /**
-     * Check if there is a bundle associated to a locale
-     * @param string $local
+     * Returns whether a resource bundle exists for the given locale.
+     * @param string $locale BCP 47 locale identifier.
      * @return bool
      */
-    public static function hasBundle(string $local): bool
+    public static function hasBundle(string $locale): bool
     {
-        return in_array(\Locale::canonicalize($local), self::getLocales(''));
+        return in_array(\Locale::canonicalize($locale), self::getLocales(''));
     }
 }
