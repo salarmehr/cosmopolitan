@@ -13,18 +13,18 @@ use MessageFormatter;
 use NumberFormatter;
 use ResourceBundle;
 
-require_once "Exception.php";
-require_once "Bundle.php";
+
+enum Sentinel { case Unset; }
 
 class Cosmo extends Locale
 {
-    const NONE = IntlDateFormatter::NONE;
-    const SHORT = IntlDateFormatter::SHORT;
-    const MEDIUM = IntlDateFormatter::MEDIUM;
-    const LONG = IntlDateFormatter::LONG;
-    const FULL = IntlDateFormatter::FULL;
+    const int NONE = IntlDateFormatter::NONE;
+    const int SHORT = IntlDateFormatter::SHORT;
+    const int MEDIUM = IntlDateFormatter::MEDIUM;
+    const int LONG = IntlDateFormatter::LONG;
+    const int FULL = IntlDateFormatter::FULL;
 
-    const TIME_TYPES = [
+    const array TIME_TYPES = [
         'none' => self::NONE,
         'short' => self::SHORT,
         'medium' => self::MEDIUM,
@@ -38,7 +38,7 @@ class Cosmo extends Locale
         'f' => self::FULL,
     ];
 
-    const UNITE_TYPES = [
+    const array UNIT_TYPES = [
         'short' => 'unitsNarrow',
         'medium' => 'unitsShort',
         'long' => 'units',
@@ -50,34 +50,35 @@ class Cosmo extends Locale
         'f' => 'units',
     ];
 
-    public $locale;
+    public readonly ?string $locale;
 
     // https://tools.ietf.org/rfc/bcp/bcp47#section-2.1
-    public $subtags = [
-        'language' => '',
-        'script' => '',
-        'region' => '',
-    ];
+    public readonly array $subtags;
 
-    public $modifiers = [
-        'calendar' => null, // when null, the common calendar of the locale will be used (Gregorian for most countries), see the moment() calendar param
-        'currency' => '',
-        'timezone' => null,
-    ];
+    public readonly array $modifiers;
 
     /**
-     * @param string|null $locale e.g. en_AU
-     * @param array $modifiers
+     * @param string|null $locale BCP 47 locale identifier, e.g. en_AU. Defaults to the system locale.
+     * @param array $modifiers Optional overrides: 'calendar', 'currency', 'timezone'.
      */
     public function __construct(string $locale = null, array $modifiers = [])
     {
         $this->locale = Locale::canonicalize($locale ?: Locale::getDefault());
-        $this->modifiers = $modifiers + $this->modifiers;
-        $this->subtags = Locale::parseLocale($this->locale) + $this->subtags;
 
-        if ($this->subtags['region'] && !$this->modifiers['currency']) {
-            $this->modifiers['currency'] = (new NumberFormatter($this->locale, NumberFormatter::CURRENCY))->getTextAttribute(NumberFormatter::CURRENCY_CODE);
+        $subtags = Locale::parseLocale($this->locale) + ['language' => '', 'script' => '', 'region' => ''];
+
+        $modifiers = $modifiers + [
+            'calendar' => null, // when null, the common calendar of the locale will be used (Gregorian for most countries), see the moment() calendar param
+            'currency' => '',
+            'timezone' => null,
+        ];
+
+        if ($subtags['region'] && !$modifiers['currency']) {
+            $modifiers['currency'] = new NumberFormatter($this->locale, NumberFormatter::CURRENCY)->getTextAttribute(NumberFormatter::CURRENCY_CODE);
         }
+
+        $this->subtags = $subtags;
+        $this->modifiers = $modifiers;
     }
 
     public static function create(string $locale = null, array $modifiers = []): Cosmo
@@ -86,17 +87,23 @@ class Cosmo extends Locale
     }
 
     /**
-     * Instead of locale string you provide an array of locale subtags
-     * @param array $subtags
-     * @param array $modifiers
+     * Creates a Cosmo instance from an array of locale subtags instead of a locale string.
+     * @param array $subtags Locale subtag array, e.g. ['language' => 'en', 'region' => 'AU'].
+     * @param array $modifiers Optional overrides: 'calendar', 'currency', 'timezone'.
      * @return Cosmo
-     * @see Locale::composeLocale() for the input array format
+     * @see Locale::composeLocale() for the expected array format.
      */
     public static function createFromSubtags(array $subtags, array $modifiers = []): Cosmo
     {
         return new self(Locale::composeLocale($subtags), $modifiers);
     }
 
+    /**
+     * Creates a Cosmo instance from an HTTP Accept-Language header.
+     * @param string|null $header Accept-Language header value. Defaults to $_SERVER['HTTP_ACCEPT_LANGUAGE'].
+     * @param array $modifiers Optional overrides: 'calendar', 'currency', 'timezone'.
+     * @return Cosmo
+     */
     public static function createFromHttp(?string $header = null, array $modifiers = []): Cosmo
     {
         $header = $header ?: $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? null;
@@ -105,24 +112,23 @@ class Cosmo extends Locale
 
 
     /**
-     * @param string $bundleName
-     * @param array $path
-     * @return ResourceBundle|string
+     * Retrieves a value from an ICU resource bundle, falling back to the primary language then root.
+     * @param string $bundleName ICU bundle name, e.g. Bundle::LOCALE.
+     * @param string ...$path One or more keys to traverse into the bundle.
+     * @return ResourceBundle|int|array|string|null
      */
-    public function get(string $bundleName, ...$path)
-    {
+    public function get(string $bundleName, ...$path): ResourceBundle|int|array|string|null {
         return $this->extract($this->locale, $bundleName, $path)
             ?: $this->extract(Locale::getPrimaryLanguage($this->locale), $bundleName, $path)
                 ?: $this->extract('root', $bundleName, $path);
     }
 
-    private function extract($local, $bundleName, array $path)
-    {
-        $current = Bundle::create($local, $bundleName, true);
+    private function extract($locale, $bundleName, array $path): ResourceBundle|int|array|string|null {
+        $current = Bundle::create($locale, $bundleName, true);
         foreach ($path as $item) {
             try {
                 $current = $current->get($item);
-            } catch (\Exception $exception) {
+            } catch (\Throwable $exception) {
                 return null;
             }
             if (!is_object($current)) {
@@ -135,22 +141,23 @@ class Cosmo extends Locale
     #region key -> value functions
 
     /**
-     * @param ?string $currencyCode The 3-letter ISO 4217 currency code indicating the currency to use.
-     * @param bool $getSymbol
-     * @param bool $strict
+     * Returns the localised name or symbol of a currency.
+     * @param string|null|Sentinel $currencyCode ISO 4217 currency code, e.g. 'AUD'. Defaults to the locale's currency.
+     * @param bool $getSymbol Return the currency symbol (e.g. '$') instead of the full name.
+     * @param bool $strict Throw if the currency code is invalid instead of returning it as-is.
      * @return string
-     * @throws Exception
+     * @throws Exception If $strict is true and the currency code is not recognised.
      */
-    public function currency(?string $currencyCode = null, bool $getSymbol = false, bool $strict = false): string
+    public function currency(string|null|Sentinel $currencyCode = Sentinel::Unset, bool $getSymbol = false, bool $strict = false): string
     {
-        $currencyCode = count(func_get_args()) == 0 ? $this->modifiers['currency'] : (string)$currencyCode;
+        $currencyCode = $currencyCode === Sentinel::Unset ? $this->modifiers['currency'] : (string)$currencyCode;
         $currencyCode = strtoupper($currencyCode);
 
         $currency = $this->get(Bundle::CURRENCY, 'Currencies', $currencyCode);
 
         if ($currency === null)
             if ($strict)
-                throw new Exception("$currencyCode is no a valid currency code");
+                throw new Exception("$currencyCode is not a valid currency code");
             else
                 return $currencyCode;
 
@@ -158,27 +165,31 @@ class Cosmo extends Locale
     }
 
     /**
-     * Translate a language identifier (e.g. En -> English, glk -> Gilaki)
-     * If you have a locale identifier (en-Au) instead of a language
-     * use \Locale::getPrimaryLanguage($locale) to extract the language
-     * @param ?string $language
-     * @return string
+     * Returns the localised name of a language (e.g. 'en' -> 'English', 'glk' -> 'Gilaki').
+     * If you have a full locale identifier (e.g. en_AU), pass it through Locale::getPrimaryLanguage() first.
+     * @param string|null|Sentinel $language BCP 47 language code. Defaults to the instance locale.
+     * @return string Empty string if the language is null or empty.
      */
-    public function language(?string $language = null): string
+    public function language(string|null|Sentinel $language = Sentinel::Unset): string
     {
-        $language = count(func_get_args()) == 0 ? $this->locale : $language;
+        if ($language === Sentinel::Unset) $language = $this->locale;
         // if the language is null or 'getDisplayLanguage' does not work as expected and returns the current local
         if ($language === null || $language === '') return '';
         return Locale::getDisplayLanguage($language, $this->locale);
     }
 
-    public function direction(?string $language = null): string
+    /**
+     * Returns the text direction of a language: 'rtl' or 'ltr'.
+     * @param string|null|Sentinel $language BCP 47 language code. Defaults to the instance locale.
+     * @return string 'rtl' or 'ltr'.
+     */
+    public function direction(string|null|Sentinel $language = Sentinel::Unset): string
     {
-        $language = count(func_get_args()) == 0 ? $this->locale : (string)$language;
+        $language = $language === Sentinel::Unset ? $this->locale : (string)$language;
 
         try {
             $dir = Bundle::create($language, Bundle::LOCALE, true)['layout']['characters'] ?? null;
-            return $dir == 'right-to-left' ? 'rtl' : 'ltr';
+            return $dir === 'right-to-left' ? 'rtl' : 'ltr';
         } catch (\Exception $exception) {
             return 'ltr';
         }
@@ -186,18 +197,18 @@ class Cosmo extends Locale
 
     /**
      * Translate the country of a locale (e.g. AU -> Australia)
-     * @param ?string $country ISO 3166 country codes or a valid locale
+     * @param string|Sentinel|null $country ISO 3166 country codes or a valid locale
      * @return string
      */
-    public function country(?string $country = null): string
+    public function country(string|null|Sentinel $country = Sentinel::Unset): string
     {
-        if (count(func_get_args()) == 0) {
+        if ($country === Sentinel::Unset) {
             $country = $this->subtags['region'];
         } elseif (!$country) {
             return '';
         }
 
-        if (!preg_match('#[-_]#', (string)$country)) {
+        if (!preg_match('#[-_]#', $country)) {
             $country = '_' . $country;
         }
         return Locale::getDisplayRegion($country, $this->locale);
@@ -205,16 +216,16 @@ class Cosmo extends Locale
 
     /**
      * Returns the emoji of a locale (e.g. AU -> 🇦🇺)
-     * @param ?string $country ISO 3166 country codes or a valid locale
+     * @param string|Sentinel|null $country ISO 3166 country codes or a valid locale
      * @return string
      */
-    public function flag(?string $country = null): string
+    public function flag(string|null|Sentinel $country = Sentinel::Unset): string
     {
-        if (count(func_get_args()) == 0) {
+        if ($country === Sentinel::Unset) {
             $country = $this->subtags['region'];
         }
 
-        $country = strtoupper($country);
+        $country = strtoupper($country ?? '');
 
         if (!$country) {
             return '';
@@ -226,14 +237,14 @@ class Cosmo extends Locale
     }
 
     /**
-     * Translate the script identifier (e.g. 'zh_Hans' -> 'Simplified Chinese')
-     * If no parameter is sent and the scrip subtag is presented on the locale identifier, it will be used as the input
-     * @param ?string $script
+     * Returns the localised name of a script (e.g. 'Hans' -> 'Simplified Chinese').
+     * If omitted, uses the script subtag from the instance locale if present.
+     * @param string|null|Sentinel $script ISO 15924 script code. Defaults to the locale's script subtag.
      * @return string
      */
-    public function script(?string $script = null): string
+    public function script(string|null|Sentinel $script = Sentinel::Unset): string
     {
-        if (count(func_get_args()) == 0) {
+        if ($script === Sentinel::Unset) {
             $script = $this->subtags['script'];
         }
         $script = ucwords((string)$script);
@@ -252,11 +263,22 @@ class Cosmo extends Locale
 
     #endregion
 
+    /**
+     * Formats an ICU message string with the given arguments.
+     * @param string $message ICU message pattern, e.g. '{0, plural, one {# item} other {# items}'.
+     * @param array $args Arguments to substitute into the pattern.
+     * @return string
+     */
     public function message(string $message, array $args): string
     {
         return MessageFormatter::formatMessage($this->locale, $message, $args);
     }
 
+    /**
+     * Wraps a string in the locale's quotation marks (e.g. "text" in English, «text» in Persian).
+     * @param string $quote The text to quote.
+     * @return string
+     */
     public function quote(string $quote): string
     {
         $delimiters = $this->get(Bundle::LOCALE, 'delimiters');
@@ -264,20 +286,25 @@ class Cosmo extends Locale
     }
 
     /**
-     * @param float $value
-     * @param ?string $currency The 3-letter ISO 4217 currency code indicates the currency to use.
-     * @param ?int $precision The needed number of decimals digits
-     * @param string $pattern
+     * Formats a monetary value using the locale's currency format.
+     * @param float $value The amount to format.
+     * @param string|null $currency ISO 4217 currency code, e.g. 'AUD'. Defaults to the locale's currency.
+     * @param string $pattern Optional NumberFormatter pattern to override the default format.
+     * @param int|null $precision Number of decimal digits. Defaults to the currency's standard precision.
+     * @param bool $strict Throw if no currency is available instead of returning an empty string.
      * @return string
-     * @throws Exception
+     * @throws Exception If $strict is true and no currency code is set.
      */
-    public function money(float $value, ?string $currency = null, string $pattern = '', ?int $precision = null): string
+    public function money(float $value, ?string $currency = null, string $pattern = '', ?int $precision = null, bool $strict = false): string
     {
         $currency = $currency ?: $this->modifiers['currency'];
-//        if (!$currency) {
-//            throw new Exception("No currency is set to format the monetary value.
-//                        Set the region subtag in the local identifier (e.g. en -> en_AU) or provide a valid currency code parameter.");
-//        }
+
+        if (!$currency) {
+            if ($strict)
+                throw new Exception("No currency is set. Provide a currency code or set a region in the locale (e.g. en -> en_AU).");
+            else
+                return '';
+        }
 
         $formatter = new NumberFormatter($this->locale, NumberFormatter::CURRENCY, $pattern);
         $formatter->setTextAttribute($formatter::CURRENCY_CODE, $currency);
@@ -290,8 +317,9 @@ class Cosmo extends Locale
     }
 
     /**
-     * @param float $value
-     * @param int $precision
+     * Formats a decimal value as a localised percentage (e.g. 0.2 -> '20%').
+     * @param float $value Decimal value, e.g. 0.2 for 20%.
+     * @param int $precision Maximum number of decimal digits.
      * @return string
      */
     public function percentage(float $value, int $precision = 3): string
@@ -301,37 +329,59 @@ class Cosmo extends Locale
         return $formatter->format($value);
     }
 
+    /**
+     * Formats a number using the locale's default number format.
+     * @param float $number
+     * @return string
+     */
     public function number(float $number): string
     {
-        return (new NumberFormatter($this->locale, NumberFormatter::DEFAULT_STYLE))->format($number);
-    }
-
-    public function ordinal(int $number): string
-    {
-        return (new NumberFormatter($this->locale, NumberFormatter::ORDINAL))->format($number);
+        return new NumberFormatter($this->locale, NumberFormatter::DEFAULT_STYLE)->format($number);
     }
 
     /**
-     * Get a symbol value
-     * @link https://php.net/manual/en/numberformatter.getsymbol.php
-     * @param int|string $symbol <p>
-     * Symbol specifier, one of the format symbol constants.
-     * </p>
-     * @return string The symbol string or <b>FALSE</b> on error.
+     * Formats a number as a localised ordinal (e.g. 1 -> '1st' in English).
+     * @param int $number
+     * @return string
+     */
+    public function ordinal(int $number): string
+    {
+        return new NumberFormatter($this->locale, NumberFormatter::ORDINAL)->format($number);
+    }
+
+    /**
+     * Returns a localised number symbol (e.g. 'decimal_separator', 'percent').
+     * Accepts a NumberFormatter constant (e.g. NumberFormatter::DECIMAL_SEPARATOR_SYMBOL)
+     * or a case-insensitive string name without the _SYMBOL suffix.
+     * @param int|string $symbol NumberFormatter symbol constant or string name.
+     * @return string
+     * @throws Exception If the string name does not match a known symbol.
+
      */
     public function symbol(int|string $symbol): string
     {
         if (is_string($symbol)) {
-            $symbol = strtoupper($symbol);
-            $symbol = constant("NumberFormatter::{$symbol}_SYMBOL");
+            static $symbols = null;
+            $symbols ??= array_filter(
+                new \ReflectionClass(NumberFormatter::class)->getConstants(),
+                fn($name) => str_ends_with($name, '_SYMBOL'),
+                ARRAY_FILTER_USE_KEY,
+            );
+            $key = strtoupper($symbol) . '_SYMBOL';
+            $symbol = $symbols[$key] ?? throw new Exception("$symbol is not a valid symbol name.");
         }
-        return (new NumberFormatter($this->locale, NumberFormatter::DECIMAL))->getSymbol($symbol);
+        return new NumberFormatter($this->locale, NumberFormatter::DECIMAL)->getSymbol($symbol);
     }
 
 
+    /**
+     * Spells out a number in the locale's language (e.g. 42 -> 'forty-two' in English).
+     * @param float $number
+     * @return string
+     */
     public function spellout(float $number): string
     {
-        return (new NumberFormatter($this->locale, NumberFormatter::SPELLOUT))->format($number);
+        return new NumberFormatter($this->locale, NumberFormatter::SPELLOUT)->format($number);
     }
 
     /**
@@ -350,39 +400,37 @@ class Cosmo extends Locale
 
     private function getTimeType(string $type): int
     {
-        if (!array_key_exists($type, self::TIME_TYPES)) {
-            throw new Exception("$type is not a valid type for time formatting.");
-        }
-        return self::TIME_TYPES[$type];
+        return self::TIME_TYPES[$type] ?? throw new Exception("$type is not a valid type for time formatting.");
     }
 
     /**
-     * Localise time, date, or date+time. Allowed types are none, short, medium, long and full.
-     * @param mixed $value Value to format. This may be
-     *                              a DateTimeInterface object,
-     *                              an IntlCalendar object,
-     *                              a numeric type representing a (possibly fractional) number of seconds since epoch
-     *                              or an array in the format output by localtime().
-     *                              If a DateTime or an IntlCalendar object is passed, its timezone is not considered. The object will be formatted using the formaterʼs configured timezone. If one wants to use the timezone of the object to be formatted, IntlDateFormatter::setTimeZone() must be called before the object's timezone. Alternatively, the static function IntlDateFormatter::formatObject() may be used instead.
-     * @param string $dateType
-     * @param string $timeType
-     * @param ?string $calendar The default is to use the official Calendar of the country (e.g. Persian Calendar for Iran, and Gregorian for Australia)
-     *                              to force "gregorian" calendar for all countries set this argument as "gregorian".
-     *                              'gregorian': will use this calendar to display temporal values
-     * @param ?string $pattern
+     * Formats a date, time, or date+time value using the locale's conventions.
+     * @param mixed $value A DateTimeInterface, IntlCalendar, Unix timestamp (int/float), or localtime() array.
+     * @param string $dateType Date format: 'none', 'short', 'medium', 'long', or 'full'.
+     * @param string $timeType Time format: 'none', 'short', 'medium', 'long', or 'full'.
+     * @param string|null $calendar Pass 'gregorian' to force the Gregorian calendar regardless of locale.
+     *                              Defaults to the locale's native calendar (e.g. Persian for fa_IR).
+     * @param string|null $pattern Optional ICU date/time pattern, overrides $dateType/$timeType when set.
      * @return string
-     * @throws Exception
+     * @throws Exception If the value cannot be formatted.
      */
     public function moment(mixed $value, string $dateType = 'short', string $timeType = 'short', ?string $calendar = null, ?string $pattern = null): string
     {
-        $calendar = $calendar ?: $this->modifiers['calendar'] == null;
+        $calendar = $calendar ?? $this->modifiers['calendar'];
 
         $dateType = $this->getTimeType($dateType);
         $timeType = $this->getTimeType($timeType);
         $calendarType = $calendar === 'gregorian' ? IntlDateFormatter::GREGORIAN : IntlDateFormatter::TRADITIONAL;
         $pattern = $pattern ?: ''; // IntlDateFormatter does not accept null for this param
 
-        $formatter = new IntlDateFormatter($this->locale, $dateType, $timeType, $this->modifiers['timezone'], $calendarType, $pattern);
+        $formatter = new IntlDateFormatter(
+            locale: $this->locale,
+            dateType: $dateType,
+            timeType: $timeType,
+            timezone: $this->modifiers['timezone'],
+            calendar: $calendarType,
+            pattern: $pattern,
+        );
         $result = $formatter->format($value);
         if (intl_is_failure($formatter->getErrorCode())) {
             throw new Exception($formatter->getErrorMessage(), $formatter->getErrorCode());
@@ -391,12 +439,12 @@ class Cosmo extends Locale
     }
 
     /**
-     * Format the moment (date/time) value as a string
-     * @param mixed $value
-     * @param string $pattern see https://unicode-org.github.io/icu-docs/apidoc/released/icu4c/classSimpleDateFormat.html#details
-     * @param string|null $calendar IntlDateFormatter::GREGORIAN or IntlDateFormatter::TRADITIONAL
+     * Formats a date/time value using a custom ICU pattern.
+     * @param mixed $value A DateTimeInterface, IntlCalendar, Unix timestamp (int/float), or localtime() array.
+     * @param string $pattern ICU date/time pattern, e.g. 'YYYY-MM-dd'.
+     * @param string|null $calendar Pass 'gregorian' to force the Gregorian calendar. Defaults to the locale's native calendar.
      * @return string
-     * @throws Exception
+     * @throws Exception If the value cannot be formatted.
      */
     public function formatMoment(mixed $value, string $pattern, ?string $calendar = null): string
     {
@@ -404,42 +452,40 @@ class Cosmo extends Locale
     }
 
     /**
-     * @throws Exception
-     * @deprecated  use momentFormatter()
+     * Formats a date value (no time component).
+     * @param mixed $value A DateTimeInterface, IntlCalendar, Unix timestamp, or localtime() array.
+     * @param string $type Format type: 'none', 'short', 'medium', 'long', or 'full'.
+     * @return string
      */
-    public function customTime($value, string $pattern, ?string $calendar = null): string
-    {
-        return $this->moment($value, 'none', 'none', $calendar, $pattern);
-    }
-
-    public function date($value, string $type = 'short'): string
+    public function date(mixed $value, string $type = 'short'): string
     {
         return $this->moment($value, $type, 'none');
     }
 
-    public function time($value, string $type = 'short'): string
+    /**
+     * Formats a time value (no date component).
+     * @param mixed $value A DateTimeInterface, IntlCalendar, Unix timestamp, or localtime() array.
+     * @param string $type Format type: 'none', 'short', 'medium', 'long', or 'full'.
+     * @return string
+     */
+    public function time(mixed $value, string $type = 'short'): string
     {
         return $this->moment($value, 'none', $type);
     }
 
     /**
-     * This method is experimental
-     * Localise units and scales.
-     * @param        $unit
-     * @param        $scale
-     * @param        $value
-     * @param string $type
+     * Formats a measurement value with a localised unit (e.g. 2.19 gigabytes, 26 degrees Celsius).
+     * @param string $unit Unit category, e.g. 'digital', 'temperature', 'mass'.
+     * @param string $scale Unit scale within the category, e.g. 'gigabyte', 'celsius', 'gram'.
+     * @param float|int $value The numeric value to format.
+     * @param string $type Format width: 'short', 'medium', 'long', or 'full'.
      * @return string
-     * @throws Exception
-     * @see https://intl.rmcreative.ru/site/unit-data?locale=en for the list of possible units and scales
+     * @throws Exception If $type is not a valid format width.
+     * @see https://intl.rmcreative.ru/site/unit-data?locale=en for available units and scales.
      */
-    public function unit($unit, $scale, $value, string $type = 'full'): string
+    public function unit(string $unit, string $scale, float|int $value, string $type = 'full'): string
     {
-        if (!array_key_exists($type, self::UNITE_TYPES)) {
-            throw new Exception("$type is not a valid type for unit formatting.");
-        }
-
-        $bundle = $this->get('ICUDATA-unit', self::UNITE_TYPES[$type], $unit, $scale);
+        $bundle = $this->get('ICUDATA-unit', self::UNIT_TYPES[$type] ?? throw new Exception("$type is not a valid type for unit formatting."), $unit, $scale);
         $message = $this->bundleToPluralMessage($bundle);
         return MessageFormatter::formatMessage($this->locale, $message, [$value]);
     }

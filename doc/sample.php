@@ -1,4 +1,5 @@
-<?php // example.php
+<?php
+date_default_timezone_set('UTC');
 require_once 'vendor/autoload.php';
 
 use Salarmehr\Cosmopolitan\Cosmo;
@@ -6,7 +7,7 @@ use Salarmehr\Cosmopolitan\Cosmo;
 
 $localesTimeZones = [
     ['en_AU', 'Australia/Sydney'],
-    ['en_UK', 'Europe/London'],
+    ['en_GB', 'Europe/London'],
     ['de_DE', 'Europe/Berlin'],
     ['zh_CN', 'Asia/Chongqing'],
     ['fa-IR', 'Asia/Tehran'],
@@ -48,7 +49,7 @@ foreach ($localesTimeZones as [$locale, $timezone]) {
     // you can send 'short','medium','long' or 'full'
     // as an argument to set the type of time or date.
     $time = new DateTime('2020/01/02 09:25:30');
-    echo $cosmo->moment($time) . "\n"; // data and time
+    echo $cosmo->moment($time) . "\n"; // date and time
     echo $cosmo->time($time, 'full') . "\n";
     echo $cosmo->date($time, 'full') . "\n";
     echo  "\n";

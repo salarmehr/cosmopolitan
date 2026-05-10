@@ -6,94 +6,94 @@
 \____/\____/____/_/ /_/ /_/\____/ .___/\____/_/_/\__/\__,_/_/ /_/
                                /_/                                
 ```
-It does not matter if you are developing a console app for personal use or a web application in 30 languages.
-As far as you display some data you will need to represent your data in the format your users will understand.
-Don't worry! Cosmopolitan is here to help!
-
+As long as you display data, you need to present it in a format your users will understand.
 Cosmopolitan is the ultimate tool to localise your PHP application.
-Just set the locale (`language-country`) and timezone, and your
-application is localised for your audience.
+Just set the locale (`language_COUNTRY`) and timezone, and your application is ready for your audience.
 
-- Cosmopolitan is based on intl PHP extension and super-efficient
-- Internationalisation for all countries, languages, scripts, calendars, and timezones
+- Requires PHP 8.4+ with the `intl` extension
+- Based on ICU data — covers all countries, languages, scripts, calendars, and timezones
 
 Features
 ---------
-* Translation of country codes, language codes, script codes, calendars codes, etc.
-* [ICU Messages](http://userguide.icu-project.org/formatparse/messages) (pluralisation, word gender selection, ...)
-* Spelling out numbers
+* Translation of country, language, script, and calendar codes
+* [ICU Messages](http://userguide.icu-project.org/formatparse/messages) (pluralisation, word gender selection, …)
 * Localisation of
-  - Monetary values
-  - Time (milliseconds to the era)
-  - Numbers
-  - Currency name and symbol
+  - Monetary values and currency names/symbols
+  - Date and time (milliseconds to the era)
+  - Numbers, ordinals, and spellout
   - Percentage
-  - Ordinal numbers
   - Quoting text
   - Duration
-  - Units (SI and U.S.)
-  - ...
+  - Measurement units (SI and U.S.)
+  - Number symbols
+* Text direction (`ltr` / `rtl`) and country flag emoji
 
 Installation
 ============
-Make sure the `php-intl` extension is installed and enabled by checking both `phpinfo()` page and  `php -m` command and run
-~~~    
+Ensure the `php-intl` extension is installed and enabled (`php -m | grep intl`), then run:
+~~~
 composer require salarmehr/cosmopolitan
 ~~~
 
-then set the Locale identifier (langauge_COUNTRY) and you are ready to go
+Set the locale identifier (`language_COUNTRY`) and you are ready to go:
 ~~~php
 use Salarmehr\Cosmopolitan\Cosmo;
-echo Cosmo::create('en')->spellout(5000000); // five million - English
-echo Cosmo::create('es_ES')->money(11000.4); // 11.000,40 € - Spanish (Spain)
-echo Cosmo::create('tu')->unit('temperature','celsius', 26); // 26°C - Turkish
+
+echo Cosmo::create('en')->spellout(5_000_000);              // five million
+echo Cosmo::create('es_ES')->money(11000.4);                // 11.000,40 €
+echo Cosmo::create('tr')->unit('temperature', 'celsius', 26); // 26°C
 ~~~
-Or you can use the helper function (it is not loaded by default).
-e.g. `echo cosmo('en')->spellout(120)` prints "one hundred twenty".
+
+Or use the helper function (not loaded by default):
+~~~php
+echo cosmo('en')->spellout(120); // "one hundred twenty"
+~~~
 
 Example
 --------
 
 ~~~php
-<?php // example.php
+<?php
+date_default_timezone_set('UTC');
 require_once 'vendor/autoload.php';
 
 use Salarmehr\Cosmopolitan\Cosmo;
 
 
-$items = [
+$localesTimeZones = [
     ['en_AU', 'Australia/Sydney'],
     ['en_GB', 'Europe/London'],
     ['de_DE', 'Europe/Berlin'],
     ['zh_CN', 'Asia/Chongqing'],
-    ['fa_IR', 'Asia/Tehran'],
+    ['fa-IR', 'Asia/Tehran'],
+    // overwrite the numeric system to `latn`  and calendar to `buddhist`
+    ['fa-IR-u-nu-latn-ca-buddhist', 'Asia/Tehran'],
     ['hi_IN', 'Asia/Jayapura'],
     ['ar_EG', 'Africa/Cairo'],
 ];
 
-foreach ($items as $item) {
-
-    [$locale, $timezone] = $item;
+foreach ($localesTimeZones as [$locale, $timezone]) {
     $cosmo = new Cosmo($locale, ['timezone' => $timezone]);
 
     $language = $cosmo->language();
     $country = $cosmo->country();
     $flag = $cosmo->flag(); // emoji flag of the country
 
-    echo "$flag $country - $language" . "\n";
+    echo "$flag $country - $language ($locale)" . "\n";
+    echo "=================================================\n";
+    echo "Language direction: " . $cosmo->direction() . "\n";
 
     echo $cosmo->spellout(10000000001) . "\n";
     echo $cosmo->ordinal(2) . "\n";
     echo $cosmo->quote("Quoted text!") . "\n";
     echo $cosmo->number(123400.567) . "\n";
     echo $cosmo->percentage(.14) . "\n";
-    echo $cosmo->duration(599) . "\n";
-    // ِ The currency code can be passed as the second argument or passed as an item of the modifiers array
+
+    // The currency code can be passed as the second argument or passed as an item of the modifiers array
     // otherwise the currency of the region will be used
-    // Make sure you have exchanged the currencies if necessary before using this function.
+    // make sure you have exchanged the currencies if necessary before using this function.
     echo $cosmo->money(12.3) . "\n";
     echo $cosmo->currency($cosmo->modifiers['currency']) . "\n";
-    echo "Language direction: " . $cosmo->direction() . "\n";
 
     // unit function is experimental
     echo $cosmo->unit('digital', 'gigabyte', 2.19) . "\n";
@@ -101,13 +101,13 @@ foreach ($items as $item) {
     echo $cosmo->unit('mass', 'gram', 120) . "\n"; // default is full
 
 
-    // you can send 'short','medium','long' or 'full
+    // you can send 'short','medium','long' or 'full'
     // as an argument to set the type of time or date.
     $time = new DateTime('2020/01/02 09:25:30');
-    echo $cosmo->moment($time) . "\n"; // data and time
+    echo $cosmo->moment($time) . "\n"; // date and time
     echo $cosmo->time($time, 'full') . "\n";
     echo $cosmo->date($time, 'full') . "\n";
-    echo PHP_EOL;
+    echo  "\n";
 }
 ~~~
 
@@ -127,11 +127,11 @@ Australian Dollar
 2.19 gigabytes
 2.19 GB
 120 grams
-2/1/20, 9:25 am
-9:25:30 am Australian Eastern Daylight Time
+2/1/20, 8:25 pm
+8:25:30 pm Australian Eastern Daylight Time
 Thursday, 2 January 2020
 
-🇺🇰 United Kingdom - English (en_UK)
+🇬🇧 United Kingdom - English (en_GB)
 =================================================
 Language direction: ltr
 ten billion one
@@ -139,14 +139,14 @@ ten billion one
 “Quoted text!”
 123,400.567
 14%
-¤12.30
-Unknown Currency
+£12.30
+British Pound
 2.19 gigabytes
 2.19 GB
 120 grams
-1/1/20, 10:25 PM
-10:25:30 PM Greenwich Mean Time
-Wednesday, January 1, 2020
+02/01/2020, 09:25
+09:25:30 Greenwich Mean Time
+Thursday, 2 January 2020
 
 🇩🇪 Deutschland - Deutsch (de_DE)
 =================================================
@@ -158,12 +158,12 @@ zehn Milliarden eins
 14 %
 12,30 €
 Euro
-2,19 Gigabytes
+2,19 Gigabyte
 2,19 GB
 120 Gramm
-01.01.20, 23:25
-23:25:30 Mitteleuropäische Normalzeit
-Mittwoch, 1. Januar 2020
+02.01.20, 10:25
+10:25:30 Mitteleuropäische Normalzeit
+Donnerstag, 2. Januar 2020
 
 🇨🇳 中国 - 中文 (zh_CN)
 =================================================
@@ -176,10 +176,10 @@ Language direction: ltr
 ¥12.30
 人民币
 2.19吉字节
-2.19吉字节
+2.19 GB
 120克
-2020/1/2 上午6:25
-中国标准时间 上午6:25:30
+2020/1/2 17:25
+中国标准时间 17:25:30
 2020年1月2日星期四
 
 🇮🇷 ایران - فارسی (fa-IR)
@@ -193,10 +193,10 @@ Language direction: rtl
 ‎ریال ۱۲
 ریال ایران
 ۲٫۱۹ گیگابایت
-۲٫۱۹ گیگابایت
+۲٫۱۹ GB
 ۱۲۰ گرم
-۱۳۹۸/۱۰/۱۲،‏ ۱:۵۵
-۱:۵۵:۳۰ (وقت عادی ایران)
+۱۳۹۸/۱۰/۱۲،‏ ۱۲:۵۵
+۱۲:۵۵:۳۰ (وقت عادی ایران)
 ۱۳۹۸ دی ۱۲, پنجشنبه
 
 🇮🇷 ایران - فارسی (fa-IR-u-nu-latn-ca-buddhist)
@@ -210,10 +210,10 @@ Language direction: rtl
 ‎ریال 12
 ریال ایران
 2.19 گیگابایت
-2.19 گیگابایت
+2.19 GB
 120 گرم
-2563/1/2 تقویم بودایی،‏ 1:55
-1:55:30 (وقت عادی ایران)
+2563/1/2 تقویم بودایی،‏ 12:55
+12:55:30 (وقت عادی ایران)
 پنجشنبه 2 ژانویهٔ 2563 تقویم بودایی
 
 🇮🇳 भारत - हिन्दी (hi_IN)
@@ -229,8 +229,8 @@ Language direction: ltr
 2.19 गीगाबाइट
 2.19 GB
 120 ग्राम
-2/1/20, 7:25 am
-7:25:30 am पूर्वी इंडोनेशिया समय
+2/1/20, 6:25 pm
+6:25:30 pm पूर्वी इंडोनेशिया समय
 गुरुवार, 2 जनवरी 2020
 
 🇪🇬 مصر - العربية (ar_EG)
@@ -244,12 +244,14 @@ Language direction: rtl
 ١٢٫٣٠ ج.م.‏
 جنيه مصري
 ٢٫١٩ غيغابايت
-٢٫١٩ غيغابايت
+٢٫١٩ غ.ب
 ١٢٠ غرامًا
-٢‏/١‏/٢٠٢٠ ١٢:٢٥ ص
-١٢:٢٥:٣٠ ص توقيت شرق أوروبا الرسمي
+٢‏/١‏/٢٠٢٠, ١١:٢٥ ص
+١١:٢٥:٣٠ ص توقيت شرق أوروبا الرسمي
 الخميس، ٢ يناير ٢٠٢٠
+
 ```
+
 Licence
 =======
 MIT
@@ -261,3 +263,10 @@ Links
 - [Online ICU Message Editor](https://format-message.github.io/icu-message-format-for-translators/)
 - [ICU data tables by Alexander Makarov](https://intl.rmcreative.ru/)
 - [The Locale Explorer by Joseph M. Newcomer](http://www.flounder.com/localeexplorer.htm)
+
+Run through Docker
+==================
+You can run the example through Docker with:
+~~~
+docker run --rm -v $(pwd):/app -w /app php:8.4-cli php doc/sample.php
+~~~

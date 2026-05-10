@@ -125,10 +125,21 @@ class CosmoTest extends TestCase
      * @dataProvider moneyProvider
      * @throws Exception
      */
-    public function testMoney($expected, $local, $value, $currency, $precison)
+    public function testMoney($expected, $local, $value, $currency, $precision)
     {
-        $actual = Cosmo::create($local)->money($value, $currency, '', $precison);
+        $actual = Cosmo::create($local)->money($value, $currency, '', $precision);
         $this->assertEquals($expected, $actual);
+    }
+
+    public function testMoneyNoCurrencyReturnsEmpty()
+    {
+        $this->assertEquals('', Cosmo::create('en')->money(12.3));
+    }
+
+    public function testMoneyNoCurrencyStrictThrows()
+    {
+        $this->expectException(Exception::class);
+        Cosmo::create('en')->money(12.3, strict: true);
     }
 
     public function symbolProvider()
@@ -165,6 +176,12 @@ class CosmoTest extends TestCase
     {
         $actual = Cosmo::create($local)->symbol($symbolName);
         $this->assertEquals($expected, $actual);
+    }
+
+    public function testSymbolInvalidNameThrows()
+    {
+        $this->expectException(Exception::class);
+        Cosmo::create('en')->symbol('not_a_real_symbol');
     }
 
     public function testOrdinal()
@@ -258,7 +275,7 @@ class CosmoTest extends TestCase
      */
     public function testDirection($locale, $expected)
     {
-        $actual = Cosmo::create($locale)->direction($locale, $expected);
+        $actual = Cosmo::create($locale)->direction();
         $this->assertEquals($expected, $actual);
     }
 
