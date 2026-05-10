@@ -81,6 +81,7 @@ class Cosmo extends Locale
         $this->modifiers = $modifiers;
     }
 
+    #[\Deprecated('Use new Cosmo() directly — PHP 8.4 supports new Cosmo($locale)->method() without parentheses.')]
     public static function create(string $locale = null, array $modifiers = []): Cosmo
     {
         return new self($locale, $modifiers);
