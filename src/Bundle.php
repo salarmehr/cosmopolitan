@@ -4,7 +4,7 @@
  */
 declare(strict_types=1);
 
-namespace Salarmehr\Cosmopolitan;
+namespace Miloun\Cosmo;
 
 use ReturnTypeWillChange;
 

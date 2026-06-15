@@ -39,9 +39,9 @@ Set the locale identifier (`language_COUNTRY`) and you are ready to go:
 ~~~php
 use Salarmehr\Cosmopolitan\Cosmo;
 
-echo Cosmo::create('en')->spellout(5_000_000);              // five million
-echo Cosmo::create('es_ES')->money(11000.4);                // 11.000,40 €
-echo Cosmo::create('tr')->unit('temperature', 'celsius', 26); // 26°C
+echo new Cosmo('en')->spellout(5_000_000);              // five million
+echo new Cosmo('es_ES')->money(11000.4);                // 11.000,40 €
+echo new Cosmo('tr')->unit('temperature', 'celsius', 26); // 26°C
 ~~~
 
 Or use the helper function (not loaded by default):

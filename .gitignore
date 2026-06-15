@@ -1,5 +1,7 @@
 /vendor/
 /lab/
+/site/
+.phpdoc/
 composer.lock
 .idea
 

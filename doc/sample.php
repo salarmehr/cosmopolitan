@@ -2,7 +2,7 @@
 date_default_timezone_set('UTC');
 require_once 'vendor/autoload.php';
 
-use Salarmehr\Cosmopolitan\Cosmo;
+use Miloun\Cosmo\Cosmo;
 
 
 $localesTimeZones = [
@@ -18,7 +18,7 @@ $localesTimeZones = [
 ];
 
 foreach ($localesTimeZones as [$locale, $timezone]) {
-    $cosmo = new Cosmo($locale, ['timezone' => $timezone]);
+    $cosmo = new Cosmo($locale, ['timeZone' => $timezone]);
 
     $language = $cosmo->language();
     $country = $cosmo->country();

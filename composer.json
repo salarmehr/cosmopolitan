@@ -3,10 +3,16 @@
   "description": "Super efficient application localisation",
   "type": "internationalisation",
   "license": "MIT",
+  "homepage": "https://cosmo.miloun.com/?lang=php",
+  "support": {
+    "docs": "https://cosmo.miloun.com/api-reference/?lang=php",
+    "issues": "https://github.com/salarmehr/cosmopolitan/issues",
+    "source": "https://github.com/salarmehr/cosmopolitan"
+  },
   "authors": [
     {
       "name": "Aiden Adrian",
-      "email": "cosmopolitan@aidenadrain.com"
+      "email": "aiden@miloun.com"
     }
   ],
   "require": {
@@ -15,7 +21,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Salarmehr\\Cosmopolitan\\": "src/"
+      "Miloun\\Cosmo\\": "src/"
     }
   },
   "require-dev": {

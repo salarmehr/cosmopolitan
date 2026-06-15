@@ -8,7 +8,7 @@
  * to the "files" section of your composer.json or use require_one to load it.
  */
 
-use Salarmehr\Cosmopolitan\Cosmo;
+use Miloun\Cosmo\Cosmo;
 
 if (!function_exists('cosmo')) {
     function cosmo(string $locale = null, array $modifiers = []): Cosmo

@@ -5,8 +5,8 @@
 
 declare(strict_types=1);
 
-namespace Salarmehr\Cosmopolitan;
+namespace Miloun\Cosmo;
 
-class Exception extends \Exception
+class CosmoException extends \Exception
 {
 }
