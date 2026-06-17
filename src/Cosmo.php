@@ -643,6 +643,27 @@ class Cosmo extends Locale
     }
 
     /**
+     * Formats a number with a fixed number of fraction digits — always exactly
+     * $fractionDigits, padding with trailing zeros and rounding as needed. Use it
+     * when you want 1 to render as '1.00' and 1.002 to stay '1.00', never '1.0'.
+     * Pass an $options bag (see
+     * {@see number()}) to widen the band — e.g. ['maximumFractionDigits' => 3] —
+     * or tweak rounding/grouping.
+     * @param float $value
+     * @param int $fractionDigits Fixed fraction digits (sets both the min and the max); defaults to 2.
+     * @param array $options Optional number-formatting controls.
+     * @return string
+     */
+    public function precision(float $value, int $fractionDigits = 2, array $options = []): string
+    {
+        $formatter = new NumberFormatter($this->locale, NumberFormatter::DECIMAL);
+        $formatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, $fractionDigits);
+        $formatter->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, $fractionDigits);
+        $this->applyNumberOptions($formatter, $options);
+        return $formatter->format($value);
+    }
+
+    /**
      * Formats a number as a localised ordinal (e.g. 1 -> '1st' in English).
      * @param int $number
      * @return string

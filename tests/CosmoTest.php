@@ -38,6 +38,18 @@ class CosmoTest extends TestCase
         $this->assertEquals('20%', $actual);
     }
 
+    public function testPrecision()
+    {
+        $this->assertSame('1.00', new Cosmo('en')->precision(1)); // fractionDigits defaults to 2
+        $this->assertSame('1.00', new Cosmo('en')->precision(1, 2));
+        $this->assertSame('1.00', new Cosmo('en')->precision(1.002, 2));
+        $this->assertSame('1.50', new Cosmo('en')->precision(1.5, 2));
+        $this->assertSame('1,234.50', new Cosmo('en')->precision(1234.5, 2));
+        $this->assertSame('1,50', new Cosmo('de')->precision(1.5, 2));
+        // options widen the band: at least 1, at most 3 fraction digits.
+        $this->assertSame('1.2', new Cosmo('en')->precision(1.2, 1, ['maximumFractionDigits' => 3]));
+    }
+
     public function quoteProvider()
     {
         return [
