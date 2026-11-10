@@ -16,7 +16,7 @@
     }
   ],
   "require": {
-    "php": ">=8.4",
+    "php": ">=8.4 <8.5",
     "ext-intl": "*"
   },
   "autoload": {
@@ -25,6 +25,11 @@
     }
   },
   "require-dev": {
-    "phpunit/phpunit": "^8"
+    "phpunit/phpunit": "^8",
+    "phpstan/phpstan": "^2.1"
+  },
+  "scripts": {
+    "test": "@php -d error_reporting=-1 -d display_errors=1 vendor/bin/phpunit --do-not-cache-result --fail-on-risky --fail-on-warning",
+    "analyse": "@php vendor/bin/phpstan analyse --no-progress --memory-limit=512M"
   }
 }

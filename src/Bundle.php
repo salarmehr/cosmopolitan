@@ -18,14 +18,14 @@ class Bundle extends \ResourceBundle
 
     /**
      * @inheritDoc
-     * @throws Exception
+     * @throws CosmoException
      */
     #[ReturnTypeWillChange] #[\Override]
     public function get($index, $fallback = null): mixed
     {
         $output = parent::get($index);
         if (intl_is_failure(self::getErrorCode())) {
-            throw new Exception(self::getErrorMessage(), self::getErrorCode());
+            throw new CosmoException(self::getErrorMessage(), self::getErrorCode());
         }
         return $output;
     }

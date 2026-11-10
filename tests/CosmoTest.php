@@ -326,6 +326,12 @@ class CosmoTest extends TestCase
         $this->assertSame('en_Latn_US_POSIX', new Cosmo('en_US_POSIX')->addLikelySubtags()->locale);
         $source = new Cosmo('en', ['timeZone' => 'Australia/Sydney', 'currency' => 'AUD']);
         $this->assertSame($source->modifiers, $source->addLikelySubtags()->modifiers);
+        $expanded = $source->addLikelySubtags();
+        $this->assertNotSame($source, $expanded);
+        $this->assertSame('en', $source->locale);
+        $this->assertSame($source->modifiers, $expanded->removeLikelySubtags()->modifiers);
+        $this->assertSame('en', $expanded->removeLikelySubtags()->locale);
+        $this->assertSame('fa@calendar=persian', new Cosmo('fa_Arab_IR@calendar=persian')->removeLikelySubtags()->locale);
     }
 
     public function testMoment(){

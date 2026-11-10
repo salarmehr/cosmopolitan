@@ -13,6 +13,7 @@ use IntlCalendar;
 use IntlChar;
 use IntlDateFormatter;
 use IntlDatePatternGenerator;
+use IntlRuleBasedBreakIterator;
 use IntlTimeZone;
 use Locale;
 use MessageFormatter;
@@ -24,6 +25,7 @@ use Transliterator;
 
 enum Sentinel { case Unset; }
 
+/** @phpstan-consistent-constructor */
 class Cosmo extends Locale
 {
     const int NONE = IntlDateFormatter::NONE;
@@ -291,7 +293,7 @@ class Cosmo extends Locale
      *                        currencyDisplay:"symbol" (not the ambiguous narrow form).
      * @param bool $strict Throw if the currency code is invalid instead of returning it as-is.
      * @return string
-     * @throws Exception If $strict is true and the currency code is not recognised.
+     * @throws CosmoException If $strict is true and the currency code is not recognised.
      */
     public function currency(string|null|Sentinel $currencyCode = Sentinel::Unset, bool $getSymbol = false, bool $strict = false): string
     {
@@ -347,8 +349,7 @@ class Cosmo extends Locale
 
     /**
      * Returns a new Cosmo with likely subtags added (e.g. "en" → "en_Latn_US").
-     * ext-intl wraps neither uloc_addLikelySubtags nor Intl.Locale#maximize, so this
-     * implements the CLDR likely-subtags algorithm using the installed ICU data.
+     * Implements the CLDR likely-subtags algorithm using the installed ICU data.
      */
     public function addLikelySubtags(): static
     {
@@ -360,8 +361,8 @@ class Cosmo extends Locale
 
     /**
      * Returns a new Cosmo with likely subtags removed (e.g. "en_Latn_US" → "en").
-     * CLDR algorithm: keep the shortest of language / language_region /
-     * language_script that still maximises to the same locale.
+     * Keeps the shortest of language / language_region / language_script that
+     * maximises to the same locale.
      */
     public function removeLikelySubtags(): static
     {
@@ -585,7 +586,7 @@ class Cosmo extends Locale
      * @param bool $strict Throw if no currency is available instead of returning an empty string.
      * @param string $pattern Optional NumberFormatter pattern to override the default format (PHP-only).
      * @return string
-     * @throws Exception If $strict is true and no currency code is set.
+     * @throws CosmoException If $strict is true and no currency code is set.
      */
     public function money(float $value, ?string $currency = null, ?int $precision = null, bool $strict = false, string $pattern = '', array $options = []): string
     {
@@ -688,7 +689,7 @@ class Cosmo extends Locale
      * and the `_symbol`/`_separator`/`_sign` suffixes are accepted too.
      * @param int|string $symbol NumberFormatter symbol constant or string name.
      * @return string
-     * @throws Exception If the string name does not match a known symbol.
+     * @throws CosmoException If the string name does not match a known symbol.
      */
     public function symbol(int|string $symbol): string
     {
@@ -780,7 +781,7 @@ class Cosmo extends Locale
      *                              Defaults to the locale's native calendar (e.g. Persian for fa_IR).
      * @param string|null $pattern Optional ICU date/time pattern, overrides $dateWidth/$timeWidth when set.
      * @return string
-     * @throws Exception If the value cannot be formatted.
+     * @throws CosmoException If the value cannot be formatted.
      */
     public function moment(mixed $value, string $dateWidth = 'short', string $timeWidth = 'short', ?string $calendar = null, ?string $pattern = null): string
     {
@@ -801,7 +802,7 @@ class Cosmo extends Locale
         );
         $result = $formatter->format($value);
         if (intl_is_failure($formatter->getErrorCode())) {
-            throw new Exception($formatter->getErrorMessage(), $formatter->getErrorCode());
+            throw new CosmoException($formatter->getErrorMessage(), $formatter->getErrorCode());
         }
         return $result;
     }
@@ -812,7 +813,7 @@ class Cosmo extends Locale
      * @param string $pattern ICU date/time pattern, e.g. 'YYYY-MM-dd'.
      * @param string|null $calendar Pass 'gregorian' to force the Gregorian calendar. Defaults to the locale's native calendar.
      * @return string
-     * @throws Exception If the value cannot be formatted.
+     * @throws CosmoException If the value cannot be formatted.
      */
     public function formatMoment(mixed $value, string $pattern, ?string $calendar = null): string
     {
@@ -821,7 +822,7 @@ class Cosmo extends Locale
 
     /**
      * Parses a localised number ('1.234,56' in de -> 1234.56). The inverse of number().
-     * @throws Exception If the text is not a number in this locale.
+     * @throws CosmoException If the text is not a number in this locale.
      */
     public function parseNumber(string $text): float
     {
@@ -836,7 +837,7 @@ class Cosmo extends Locale
      * Parses a localised monetary string ('$12.30' -> amount 12.3, currency USD).
      * The inverse of money().
      * @return array{amount: float, currency: string}
-     * @throws Exception If the text is not a monetary value in this locale.
+     * @throws CosmoException If the text is not a monetary value in this locale.
      */
     public function parseMoney(string $text): array
     {
@@ -852,7 +853,7 @@ class Cosmo extends Locale
      * Parses a localised date written at the given width. The inverse of date().
      * @param string $width 'short', 'medium', 'long', or 'full'.
      * @return DateTimeImmutable The parsed moment (UTC).
-     * @throws Exception If the text does not match the locale's date format.
+     * @throws CosmoException If the text does not match the locale's date format.
      */
     public function parseDate(string $text, string $width = 'short'): DateTimeImmutable
     {
@@ -876,7 +877,7 @@ class Cosmo extends Locale
     /**
      * Parses a moment with a raw ICU pattern. The inverse of formatMoment().
      * @return DateTimeImmutable The parsed moment (UTC).
-     * @throws Exception If the text does not match the pattern.
+     * @throws CosmoException If the text does not match the pattern.
      */
     public function parseMoment(string $text, string $pattern): DateTimeImmutable
     {
@@ -939,7 +940,7 @@ class Cosmo extends Locale
      * @param string $dateWidth Date component width: 'none', 'short', or 'medium'.
      * @param string $timeWidth Time component width: 'none', 'short', or 'medium'.
      * @return string
-     * @throws Exception If $dateWidth or $timeWidth is 'long'/'full' or otherwise invalid.
+     * @throws CosmoException If $dateWidth or $timeWidth is 'long'/'full' or otherwise invalid.
      */
     public function dateRange(mixed $start, mixed $end, string $dateWidth = 'medium', string $timeWidth = 'none'): string
     {
@@ -1021,7 +1022,7 @@ class Cosmo extends Locale
      * @param float|int $value The numeric value to format.
      * @param string $width Format width: 'short', 'medium', 'long', or 'full'.
      * @return string
-     * @throws Exception If $width is not a valid format width.
+     * @throws CosmoException If $width is not a valid format width.
      * @see https://intl.rmcreative.ru/site/unit-data?locale=en for available units and scales.
      */
     public function unit(string $category, string $unit, float|int $value, string $width = 'full'): string
@@ -1091,7 +1092,7 @@ class Cosmo extends Locale
      * (PHP's intl exposes no ICU StringSearch).
      * @param string $sensitivity 'base' (ignore case & accents, default), 'accent',
      *                            'case', or 'variant' (exact).
-     * @throws Exception If $sensitivity is not recognised.
+     * @throws CosmoException If $sensitivity is not recognised.
      */
     public function contains(string $haystack, string $needle, string $sensitivity = 'base', array $options = []): bool
     {
@@ -1135,6 +1136,9 @@ class Cosmo extends Locale
     public function splitWords(string $text): array
     {
         $iterator = IntlBreakIterator::createWordInstance($this->locale);
+        if (!$iterator instanceof IntlRuleBasedBreakIterator) {
+            throw new UnsupportedException('ICU did not provide a rule-based word iterator.');
+        }
         $iterator->setText($text);
 
         $words = [];
@@ -1189,7 +1193,7 @@ class Cosmo extends Locale
         $boundary = $iterator->preceding(strlen($head));
 
         $cut = $head;
-        if ($boundary > 0 && $boundary !== IntlBreakIterator::DONE) {
+        if ($boundary > 0) {
             $candidate = rtrim(substr($head, 0, $boundary));
             if ($candidate !== '') {
                 $cut = $candidate;
@@ -1226,7 +1230,7 @@ class Cosmo extends Locale
      * @param string $id A compound ICU transliterator id; see
      *      supportedValues('transliterator') for the building blocks.
      * @return string
-     * @throws Exception If $id is not a valid transliterator id.
+     * @throws CosmoException If $id is not a valid transliterator id.
      */
     public function transliterate(string $text, string $id): string
     {
@@ -1307,7 +1311,7 @@ class Cosmo extends Locale
      * Localised month names (January … December), following the active calendar.
      * @param string $width 'none'/'long'/'full' (wide), 'medium' (abbreviated), or 'short' (narrow).
      * @return string[]
-     * @throws Exception If $width is not valid.
+     * @throws CosmoException If $width is not valid.
      */
     public function monthNames(string $width = 'full'): array
     {
@@ -1337,7 +1341,7 @@ class Cosmo extends Locale
      * Localised weekday names, Sunday first (matching ICU symbol order).
      * @param string $width 'none'/'long'/'full' (wide), 'medium' (abbreviated), or 'short' (narrow).
      * @return string[]
-     * @throws Exception If $width is not valid.
+     * @throws CosmoException If $width is not valid.
      */
     public function weekdayNames(string $width = 'full'): array
     {
@@ -1356,7 +1360,7 @@ class Cosmo extends Locale
      * Defaults to the 'timeZone' modifier, falling back to the runtime zone.
      * @param string $style 'long' (default), 'short', 'shortOffset', 'longOffset',
      *                      'shortGeneric', or 'longGeneric'.
-     * @throws Exception If $style is not valid.
+     * @throws CosmoException If $style is not valid.
      */
     public function timeZoneName(string $style = 'long'): string
     {
@@ -1400,7 +1404,7 @@ class Cosmo extends Locale
      * @param int|float $amount  Signed: negative = past ("… ago"), positive = future ("in …").
      * @param string    $unit    second, minute, hour, day, week, month, quarter, or year.
      * @param string    $numeric 'always' (default, "1 day ago") or 'auto' ("yesterday").
-     * @throws Exception If $unit is not a valid relative unit.
+     * @throws CosmoException If $unit is not a valid relative unit.
      */
     public function relativeDuration(int|float $amount, string $unit, string $numeric = 'always'): string
     {
@@ -1484,7 +1488,7 @@ class Cosmo extends Locale
      * @param array $items The items to join.
      * @param string $type 'conjunction' (and, default), 'disjunction' (or), or 'unit'.
      * @param string $width 'none'/'long'/'full' (wide), 'medium' (short), or 'short' (narrow).
-     * @throws Exception If $type or $width is not valid.
+     * @throws CosmoException If $type or $width is not valid.
      */
     public function join(array $items, string $type = 'conjunction', string $width = 'full'): string
     {
@@ -1535,7 +1539,7 @@ class Cosmo extends Locale
      * Generic localised display name — a single entry point over the dedicated lookups.
      * @param string $type 'language', 'region', 'script', 'calendar', or 'currency'.
      * @param string $code The code to translate (e.g. 'en', 'AU', 'Hans', 'buddhist', 'EUR').
-     * @throws Exception If $type is not recognised.
+     * @throws CosmoException If $type is not recognised.
      */
     public function displayName(string $type, string $code): string
     {
@@ -1576,7 +1580,7 @@ class Cosmo extends Locale
      * raise rather than return a hardcoded list.
      * @param string $key 'timeZone', 'currency', or 'transliterator'.
      * @return string[]
-     * @throws Exception If $key is not supported.
+     * @throws CosmoException If $key is not supported.
      */
     public function supportedValues(string $key): array
     {

@@ -1,6 +1,10 @@
 Changelog
 =======
-* Unreleased
+* v3.0.1
+    - Add `precision()` for fixed fraction digits (defaults to 2).
+    - Add PHP 8.4 GitHub Actions checks for PHPUnit and PHPStan level 5, with `composer test` and `composer analyse` commands for local runs.
+    - Fix error paths still referring to the removed `Miloun\Cosmo\Exception` class; they now throw `CosmoException`.
+    - Restrict Composer's PHP requirement to `>=8.4 <8.5`; v3 retains `Locale` inheritance and its existing instance API.
     - Fix PHP 8.4 implicit-nullability deprecations in the constructor, `create()`, and `cosmo()` helper.
     - Restore likely-subtag expansion/minimisation and script-based direction detection by reading the installed ICU langInfo resource when its legacy table is unavailable; no locale data is bundled.
     - Accept ICU Unicode spacing variants in date-formatting tests while preserving native formatter output.

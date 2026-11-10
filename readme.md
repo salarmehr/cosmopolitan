@@ -56,7 +56,7 @@ names and behaviour:
 
 ## Requirements
 
-- PHP 8.4+ with the `intl` extension (`php -m | grep intl`)
+- PHP 8.4.x with the `intl` extension (`php -m | grep intl`). Version 3 requires PHP `>=8.4 <8.5`.
 
 ## Install
 
@@ -108,8 +108,12 @@ limits, and [resources](https://cosmo.miloun.com/resources/) for ICU/CLDR refere
 
 ```sh
 composer install
-vendor/bin/phpunit
+composer test
+composer analyse
 ```
+
+GitHub Actions runs PHPUnit and PHPStan (level 5, targeting PHP 8.4) on pushes,
+pull requests, and manual runs.
 
 ## Errors
 

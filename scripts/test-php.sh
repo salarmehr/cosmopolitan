@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Run syntax checks and the installed PHPUnit suite in isolated PHP containers.
-# Usage: bash scripts/test-php.sh [8.3 8.4 8.5 ...]
+# Usage: bash scripts/test-php.sh [8.4 ...]
 # Requires Docker and an existing vendor/ directory (composer install).
 set -euo pipefail
 
@@ -12,7 +12,7 @@ fi
 command -v docker >/dev/null
 versions=("$@")
 if (( ${#versions[@]} == 0 )); then
-    versions=(8.4 8.5)
+    versions=(8.4)
 fi
 for version in "${versions[@]}"; do
     if [[ ! "$version" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then

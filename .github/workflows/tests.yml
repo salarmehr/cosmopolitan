@@ -1,0 +1,38 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: PHP 8.4 / PHPUnit and PHPStan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: intl, mbstring, dom, xml, xmlwriter
+          coverage: none
+          tools: composer:v2
+          ini-values: error_reporting=E_ALL, display_errors=On
+      - name: Validate Composer manifest
+        run: composer validate --strict
+      - name: Install dependencies
+        id: dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+      - name: Run PHPUnit
+        run: composer test
+      - name: Run PHPStan
+        if: ${{ !cancelled() && steps.dependencies.outcome == 'success' }}
+        run: composer analyse
