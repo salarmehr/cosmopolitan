@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Run syntax checks and the installed PHPUnit suite in isolated PHP containers.
-# Usage: bash scripts/test-php.sh [8.4 ...]
+# Usage: bash scripts/test-php.sh [8.4 8.5 8.6-rc ...]
 # Requires Docker and an existing vendor/ directory (composer install).
 set -euo pipefail
 
@@ -12,10 +12,10 @@ fi
 command -v docker >/dev/null
 versions=("$@")
 if (( ${#versions[@]} == 0 )); then
-    versions=(8.4)
+    versions=(8.4 8.5 8.6-rc)
 fi
 for version in "${versions[@]}"; do
-    if [[ ! "$version" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+    if [[ ! "$version" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?(-rc)?$ ]]; then
         echo "Invalid PHP version: $version" >&2
         exit 1
     fi
@@ -27,6 +27,7 @@ cat > "$results_dir/Dockerfile" <<'DOCKERFILE'
 ARG PHP_VERSION=8.4
 FROM php:${PHP_VERSION}-cli
 RUN apt-get update && apt-get install -y --no-install-recommends libicu-dev && docker-php-ext-install intl && rm -rf /var/lib/apt/lists/*
+RUN if ! php -r 'exit(extension_loaded("mbstring") ? 0 : 1);'; then apt-get update && apt-get install -y --no-install-recommends libonig-dev && docker-php-ext-install -j2 mbstring && rm -rf /var/lib/apt/lists/*; fi
 DOCKERFILE
 
 failed=0
@@ -48,7 +49,7 @@ for version in "${versions[@]}"; do
             while IFS= read -r file; do
                 php -d error_reporting=-1 -d display_errors=1 -l "$file" || status=1
             done < /tmp/php-files
-            php -d error_reporting=-1 -d display_errors=1 vendor/bin/phpunit --do-not-cache-result || status=1
+            php -d error_reporting=-1 -d display_errors=1 vendor/bin/phpunit --do-not-cache-result --fail-on-risky --fail-on-warning || status=1
             exit "$status"
         ' > "$results_dir/result-$version.log" 2>&1; then
         echo "PHP $version: PASS"

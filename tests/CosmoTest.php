@@ -283,7 +283,7 @@ class CosmoTest extends TestCase
             ['fa', 'rtl'],
             ['en', 'ltr'],
             // Minority RTL scripts with no locale-level layout data in ICU —
-            // resolved via likely script + IntlChar bidi properties.
+            // resolved by native ICU or the PHP 8.4 script-based fallback.
             ['dv', 'rtl'],   // Dhivehi (Thaana)
             ['nqo', 'rtl'],  // N'Ko
             // An explicit script subtag wins over the language's likely script.
@@ -332,6 +332,27 @@ class CosmoTest extends TestCase
         $this->assertSame($source->modifiers, $expanded->removeLikelySubtags()->modifiers);
         $this->assertSame('en', $expanded->removeLikelySubtags()->locale);
         $this->assertSame('fa@calendar=persian', new Cosmo('fa_Arab_IR@calendar=persian')->removeLikelySubtags()->locale);
+    }
+
+    public function testNativeLocaleFunctions()
+    {
+        if (!function_exists('locale_add_likely_subtags') || !function_exists('locale_minimize_subtags') || !function_exists('locale_is_right_to_left')) {
+            $this->markTestSkipped('Native locale functions require PHP 8.5 or later.');
+        }
+        // Compare with native ICU, including aliases, unknown subtags, rare
+        // scripts, variants, and keywords that differ from the PHP 8.4 fallback.
+        foreach (['iw', 'in', 'und', 'xx', 'xx_Arab', 'en_ZZ', 'en_Zzzz', 'und_Cpmn', 'ar_Latn', 'az_IQ', 'en_US_POSIX', 'fa_IR@calendar=persian'] as $locale) {
+            $source = new Cosmo($locale, ['timeZone' => 'UTC', 'currency' => 'USD']);
+            $expanded = $source->addLikelySubtags();
+            $minimized = $source->removeLikelySubtags();
+            $this->assertSame(locale_add_likely_subtags($source->locale), $expanded->locale);
+            $this->assertSame(locale_minimize_subtags($source->locale), $minimized->locale);
+            $this->assertSame(locale_is_right_to_left($source->locale) ? 'rtl' : 'ltr', $source->direction());
+            $this->assertSame($source->modifiers, $expanded->modifiers);
+            $this->assertSame($source->modifiers, $minimized->modifiers);
+            $this->assertNotSame($source, $expanded);
+            $this->assertNotSame($source, $minimized);
+        }
     }
 
     public function testMoment(){

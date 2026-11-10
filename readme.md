@@ -56,7 +56,7 @@ names and behaviour:
 
 ## Requirements
 
-- PHP 8.4.x with the `intl` extension (`php -m | grep intl`). Version 3 requires PHP `>=8.4 <8.5`.
+- PHP 8.4+ with the `intl` extension (`php -m | grep intl`). Version 4 requires PHP `>=8.4`. Tests currently cover PHP 8.4–8.6; PHP 8.6 is tested using its release candidate until the stable release.
 
 ## Install
 
@@ -112,8 +112,22 @@ composer test
 composer analyse
 ```
 
-GitHub Actions runs PHPUnit and PHPStan (level 5, targeting PHP 8.4) on pushes,
-pull requests, and manual runs.
+GitHub Actions runs PHPUnit and PHPStan level 5 on PHP 8.4, 8.5, and 8.6 for
+pushes, pull requests, and manual runs. Static analysis targets PHP 8.4, the
+minimum supported runtime.
+
+## Upgrading from v3
+
+`Cosmo` no longer extends PHP's `Locale`. Call inherited utilities and constants
+directly on `Locale`, for example `Locale::getDefault()` instead of
+`Cosmo::getDefault()`. A `Cosmo` instance no longer satisfies a `Locale` type hint.
+Cosmo's formatting methods and instance locale-expansion methods remain available.
+
+On PHP 8.5 and later, expansion, minimisation, and direction use native ICU-backed
+PHP functions. PHP 8.4 retains the installed-ICU implementation, with no bundled
+locale data. Native expansion canonicalises aliases such as `iw` to `he`, treats
+`ZZ` and `Zzzz` as unknown subtags, and can produce different results for unknown
+languages and rare scripts. Keywords, variants, and Cosmo modifiers are preserved.
 
 ## Errors
 

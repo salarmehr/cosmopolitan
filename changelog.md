@@ -1,5 +1,11 @@
 Changelog
 =======
+* v4.0.0
+    - **Breaking:** `Cosmo` no longer extends PHP's `Locale`. Use `Locale` directly for inherited static utilities and constants; `Cosmo` instances no longer satisfy `Locale` type hints.
+    - Require PHP `>=8.4` without an upper bound, with PHPUnit and PHPStan CI checks on PHP 8.4, 8.5, and 8.6 (prerelease).
+    - Use native PHP locale expansion, minimisation, and direction functions when available, retaining the installed-ICU implementation for PHP 8.4. No raw locale data is bundled.
+    - Native locale handling canonicalises aliases and unknown subtags and may differ from v3 for edge cases. Existing instance method names and modifier preservation are retained.
+
 * v3.0.1
     - Add `precision()` for fixed fraction digits (defaults to 2).
     - Add PHP 8.4 GitHub Actions checks for PHPUnit and PHPStan level 5, with `composer test` and `composer analyse` commands for local runs.

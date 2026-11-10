@@ -26,7 +26,7 @@ use Transliterator;
 enum Sentinel { case Unset; }
 
 /** @phpstan-consistent-constructor */
-class Cosmo extends Locale
+class Cosmo
 {
     const int NONE = IntlDateFormatter::NONE;
     const int SHORT = IntlDateFormatter::SHORT;
@@ -335,6 +335,9 @@ class Cosmo extends Locale
         $language = $language === Sentinel::Unset ? $this->locale : (string)$language;
 
         try {
+            if (\function_exists('locale_is_right_to_left')) {
+                return \locale_is_right_to_left($language) ? 'rtl' : 'ltr';
+            }
             // Direction is a property of the script, not the locale: the per-locale
             // `layout/characters` bundle field is only populated for major locales,
             // so minority RTL languages (Dhivehi/Thaana, N'Ko) silently inherited
@@ -349,10 +352,18 @@ class Cosmo extends Locale
 
     /**
      * Returns a new Cosmo with likely subtags added (e.g. "en" → "en_Latn_US").
-     * Implements the CLDR likely-subtags algorithm using the installed ICU data.
+     * Uses PHP's native function when available, otherwise implements the CLDR
+     * likely-subtags algorithm using the installed ICU data.
      */
     public function addLikelySubtags(): static
     {
+        if (\function_exists('locale_add_likely_subtags')) {
+            $locale = \locale_add_likely_subtags($this->locale);
+            if ($locale === false) {
+                throw new CosmoException(intl_get_error_message(), intl_get_error_code());
+            }
+            return new static($locale, $this->modifiers);
+        }
         $core = self::maximiseSubtags($this->locale);
         return $core === null
             ? new static($this->locale, $this->modifiers)
@@ -361,11 +372,18 @@ class Cosmo extends Locale
 
     /**
      * Returns a new Cosmo with likely subtags removed (e.g. "en_Latn_US" → "en").
-     * Keeps the shortest of language / language_region / language_script that
-     * maximises to the same locale.
+     * Uses PHP's native function when available. Otherwise keeps the shortest of
+     * language / language_region / language_script that maximises to the same locale.
      */
     public function removeLikelySubtags(): static
     {
+        if (\function_exists('locale_minimize_subtags')) {
+            $locale = \locale_minimize_subtags($this->locale);
+            if ($locale === false) {
+                throw new CosmoException(intl_get_error_message(), intl_get_error_code());
+            }
+            return new static($locale, $this->modifiers);
+        }
         $max = self::maximiseSubtags($this->locale);
         if ($max === null) {
             return new static($this->locale, $this->modifiers);
