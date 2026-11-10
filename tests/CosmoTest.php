@@ -289,6 +289,9 @@ class CosmoTest extends TestCase
             // An explicit script subtag wins over the language's likely script.
             ['ar_Latn', 'ltr'],
             ['az_IQ', 'rtl'], // region-qualified likely subtags: az is Latin, az_IQ Arabic
+            ['he', 'rtl'],
+            ['ur', 'rtl'],
+            ['sr', 'ltr'],
         ];
     }
 
@@ -316,11 +319,19 @@ class CosmoTest extends TestCase
         $this->assertSame('fa_Arab_IR@calendar=persian', new Cosmo('fa_IR@calendar=persian')->addLikelySubtags()->locale);
         // Unknown language: returned unchanged.
         $this->assertSame('xx', new Cosmo('xx')->addLikelySubtags()->locale);
+        // Region- and script-qualified lookups traverse different ICU trie branches.
+        $this->assertSame('az_Latn_AZ', new Cosmo('az')->addLikelySubtags()->locale);
+        $this->assertSame('sr_Latn_RS', new Cosmo('sr_Latn')->addLikelySubtags()->locale);
+        $this->assertSame('en_Latn_GB', new Cosmo('en_GB')->addLikelySubtags()->locale);
+        $this->assertSame('en_Latn_US_POSIX', new Cosmo('en_US_POSIX')->addLikelySubtags()->locale);
+        $source = new Cosmo('en', ['timeZone' => 'Australia/Sydney', 'currency' => 'AUD']);
+        $this->assertSame($source->modifiers, $source->addLikelySubtags()->modifiers);
     }
 
     public function testMoment(){
         $actual = new Cosmo('en_US')->moment(strtotime('2020/02/02'),'full');
-        $this->assertEquals('Sunday, February 2, 2020 at 12:00 AM', $actual);
+        // ICU versions differ in the spacing before the day period.
+        $this->assertEquals('Sunday, February 2, 2020 at 12:00 AM', str_replace("\u{202F}", ' ', $actual));
     }
 
     public function testZaman(){
@@ -518,17 +529,20 @@ class CosmoTest extends TestCase
         $t3 = gmmktime(0, 0, 0, 3, 2, 2020);
         $t4 = gmmktime(0, 0, 0, 2, 2, 2021);
         $en = new Cosmo('en_US', ['timeZone' => 'UTC']);
+        // CLDR uses thin spaces around interval separators and narrow no-break
+        // spaces before day periods in newer releases. Preserve production output.
+        $spacing = static fn(string $value): string => str_replace(["\u{2009}", "\u{202F}"], ' ', $value);
         // Elided date range — only the differing field repeats.
-        $this->assertSame('Feb 2 – 5, 2020', $en->dateRange($t1, $t2));
-        $this->assertSame('Feb 2 – Mar 2, 2020', $en->dateRange($t1, $t3));
-        $this->assertSame('Feb 2, 2020 – Feb 2, 2021', $en->dateRange($t1, $t4));
-        $this->assertSame('2/2/2020 – 2/5/2020', $en->dateRange($t1, $t2, 'short'));
+        $this->assertSame('Feb 2 – 5, 2020', $spacing($en->dateRange($t1, $t2)));
+        $this->assertSame('Feb 2 – Mar 2, 2020', $spacing($en->dateRange($t1, $t3)));
+        $this->assertSame('Feb 2, 2020 – Feb 2, 2021', $spacing($en->dateRange($t1, $t4)));
+        $this->assertSame('2/2/2020 – 2/5/2020', $spacing($en->dateRange($t1, $t2, 'short')));
         // Identical endpoints collapse to a single date.
         $this->assertSame('Feb 2, 2020', $en->dateRange($t1, $t1));
         // Time-only range.
         $th1 = gmmktime(15, 0, 0, 2, 2, 2020);
         $th2 = gmmktime(17, 30, 0, 2, 2, 2020);
-        $this->assertSame('3:00 – 5:30 PM', $en->dateRange($th1, $th2, 'none', 'short'));
+        $this->assertSame('3:00 – 5:30 PM', $spacing($en->dateRange($th1, $th2, 'none', 'short')));
         // Non-Latin locale (Japanese, ～ separator) still works.
         $this->assertSame('2020年2月2日～5日', new Cosmo('ja', ['timeZone' => 'UTC'])->dateRange($t1, $t2));
         // long/full are unsupported (no CLDR interval data; not bound by ext-intl).

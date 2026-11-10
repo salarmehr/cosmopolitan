@@ -11,7 +11,7 @@
 use Miloun\Cosmo\Cosmo;
 
 if (!function_exists('cosmo')) {
-    function cosmo(string $locale = null, array $modifiers = []): Cosmo
+    function cosmo(?string $locale = null, array $modifiers = []): Cosmo
     {
         return new Cosmo($locale, $modifiers);
     }

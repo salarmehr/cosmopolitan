@@ -185,7 +185,7 @@ class Cosmo extends Locale
      * @param string|null $locale BCP 47 locale identifier, e.g. en_AU. Defaults to the system locale.
      * @param array $modifiers Optional overrides: 'calendar', 'currency', 'timeZone'.
      */
-    public function __construct(string $locale = null, array $modifiers = [])
+    public function __construct(?string $locale = null, array $modifiers = [])
     {
         $this->locale = Locale::canonicalize($locale ?: Locale::getDefault());
 
@@ -212,7 +212,7 @@ class Cosmo extends Locale
     }
 
     #[\Deprecated('Use new Cosmo() directly — PHP 8.4 supports new Cosmo($locale)->method() without parentheses.')]
-    public static function create(string $locale = null, array $modifiers = []): Cosmo
+    public static function create(?string $locale = null, array $modifiers = []): Cosmo
     {
         return new self($locale, $modifiers);
     }
@@ -348,7 +348,7 @@ class Cosmo extends Locale
     /**
      * Returns a new Cosmo with likely subtags added (e.g. "en" → "en_Latn_US").
      * ext-intl wraps neither uloc_addLikelySubtags nor Intl.Locale#maximize, so this
-     * implements the CLDR likely-subtags algorithm over ICU's own likelySubtags table.
+     * implements the CLDR likely-subtags algorithm using the installed ICU data.
      */
     public function addLikelySubtags(): static
     {
@@ -387,16 +387,23 @@ class Cosmo extends Locale
     /**
      * Maximised ['language', 'script', 'region'] for a locale per the CLDR
      * likely-subtags algorithm (UTS #35), resolved against ICU's likelySubtags
-     * table, or null when nothing matches. Subtags present in the source always
-     * win; only missing ones are filled from the table (so az → az_Latn_AZ but
+     * table (or its modern langInfo representation), or null when nothing matches. Subtags present
+     * in the source always win; only missing ones are filled (so az → az_Latn_AZ but
      * az_IQ → az_Arab_IQ, and an explicit script like ar_Latn is never replaced).
      */
     private static function maximiseSubtags(string $locale): ?array
     {
-        $bundle = ResourceBundle::create('likelySubtags', 'ICUDATA', false);
-        if ($bundle === null) {
-            return null;
+        static $bundle = false;
+        static $fallback = null;
+        if ($bundle === false) {
+            $bundle = ResourceBundle::create('likelySubtags', 'ICUDATA', false);
         }
+        if ($bundle === null && $fallback === null) {
+            $fallback = IcuLikelySubtags::load();
+        }
+        $lookup = static fn(string $key): ?string => $bundle !== null
+            ? $bundle->get($key)
+            : ($fallback[$key] ?? null);
         // parseLocale('') returns the *environment default* locale's subtags;
         // treat an empty ID as und explicitly so results don't depend on the host.
         $sub = $locale === '' ? [] : (Locale::parseLocale($locale) ?: []);
@@ -404,11 +411,11 @@ class Cosmo extends Locale
         $script = $sub['script'] ?? '';
         $region = $sub['region'] ?? '';
         // UTS #35 lookup order, skipping keys with missing components.
-        $match = ($script !== '' && $region !== '' ? $bundle->get("{$lang}_{$script}_{$region}") : null)
-            ?? ($region !== '' ? $bundle->get("{$lang}_{$region}") : null)
-            ?? ($script !== '' ? $bundle->get("{$lang}_{$script}") : null)
-            ?? $bundle->get($lang)
-            ?? ($script !== '' ? $bundle->get("und_{$script}") : null);
+        $match = ($script !== '' && $region !== '' ? $lookup("{$lang}_{$script}_{$region}") : null)
+            ?? ($region !== '' ? $lookup("{$lang}_{$region}") : null)
+            ?? ($script !== '' ? $lookup("{$lang}_{$script}") : null)
+            ?? $lookup($lang)
+            ?? ($script !== '' ? $lookup("und_{$script}") : null);
         if ($match === null) {
             return null;
         }
@@ -1045,8 +1052,9 @@ class Cosmo extends Locale
      * runtime's ICU (Collator, IntlBreakIterator, IntlCalendar, Transliterator,
      * NumberFormatter, IntlDateFormatter, CLDR resource bundles) — no hardcoded
      * locale data. JS-only methods that depend on Intl facilities PHP's `intl`
-     * extension does not expose (addLikelySubtags/removeLikelySubtags,
-     * bestMatch, indexBuckets, personName) are intentionally absent.
+     * extension does not expose (bestMatch, indexBuckets, personName) are
+     * intentionally absent. Locale expansion/minimisation above reads ICU's
+     * langInfo resource when its legacy likely-subtags table is unavailable.
      */
     #region cosmo-js parity
 

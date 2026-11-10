@@ -1,5 +1,10 @@
 Changelog
 =======
+* Unreleased
+    - Fix PHP 8.4 implicit-nullability deprecations in the constructor, `create()`, and `cosmo()` helper.
+    - Restore likely-subtag expansion/minimisation and script-based direction detection by reading the installed ICU langInfo resource when its legacy table is unavailable; no locale data is bundled.
+    - Accept ICU Unicode spacing variants in date-formatting tests while preserving native formatter output.
+
 * v3.0 — full ICU parity with cosmo-js, cosmo-python and cosmo-java; namespace rebrand
 
     **Breaking changes**
